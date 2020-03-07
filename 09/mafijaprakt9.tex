@@ -1,0 +1,49 @@
+\documentclass{article}
+
+\title{Matemati{\v c}no-fizikalni praktikum: Diferenčne metode za PDE}
+\author{Andrej Kolar-Po{\v z}un}
+
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{subcaption}
+\usepackage{caption}
+\usepackage{float}
+\usepackage{physics}
+
+\errorcontextlines 10000
+\begin{document}
+\pagenumbering{gobble}
+\maketitle
+\newpage
+\pagenumbering{arabic}
+
+\section{Uvod}
+
+V tej nalogi bomo reševali Schrödingerjevo enačbo:
+\begin{align*}
+&\Big(i\hbar \frac{\partial}{\partial t} - H \Big) \psi(x,t) = 0 \\
+&H = -\frac{\hbar ^2}{2m} \frac{\partial ^2}{\partial x^2} + V(x) 
+\end{align*}
+
+S pomočjo operatorja časovnega razvoja lahko pridemo do tele aproksimacije:
+Časovni razvoj spremljamo ob časih $t_n = n \Delta t$
+\begin{equation*}
+\psi(x,t+\Delta t) \approx \frac{1-\frac{1}{2}i H \Delta t}{1+\frac{1}{2}i H \Delta t}\psi (x,t)
+\end{equation*}
+
+Po kraju pa lahko območje, ki nas zanima diskretiziramo kot $x_j = a+j \Delta x$ $\Delta x = (b-a)/(N-1)$ in krajevni odvod
+aproksimiramo kot diferenco:
+\begin{equation*}
+\psi ''(x) = \frac{\psi_{j+1}^n - 2\psi_j^n + \psi_{j-1} ^n}{\Delta x^2}
+\end{equation*}
+Kjer smo uvedli oznako $\psi(x_j,t_n) = \psi_j^n$
+
+Ko ti aproksimaciji vstavimo v enačbo dobimo sistem enačb katerega lahko zapišemo v matrični
+obliki kot $A\psi^{n+1} = A^* \psi^n$, kjer je $\psi ^n = (\psi_0^n,\psi_1^n,...,\psi_{N-1}^n)$
+
+
+
+
+
+\end{document}

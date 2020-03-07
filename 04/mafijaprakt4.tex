@@ -1,0 +1,379 @@
+\documentclass{article}
+
+\title{Mafija praktikum: Fourierova analiza}
+\author{Andrej Kolar-Po{\v z}un}
+
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{subcaption}
+\usepackage{caption}
+\usepackage{float}
+\usepackage{physics}
+
+\errorcontextlines 10000
+\begin{document}
+\pagenumbering{gobble}
+\maketitle
+\newpage
+\pagenumbering{arabic}
+
+\section{Uvod}
+Če imamo funkcijo $h(t)$, ki jo želimo analizirati moramo najprej dobiti diskretne vrednosti te funkcije:
+\begin{equation*}
+h_k = h(t_k),\quad t_k = k\Delta,\quad k=0, 1, 2, .... , N-1
+\end{equation*}
+Vrednosti Fouriere transformiranke $H$ potem dobimo takole:
+\begin{align*}
+&H_n =\sum_{k=0}^{N-1}h_k\ exp(2\pi ikn/N),\quad n=-\frac{N}{2},.....,\frac{N}{2} \\
+&H(\frac{n}{N\Delta}) \approx \Delta * H_n
+\end{align*}
+S tem, ko štejemo k od $-\frac{N}{2}$ do $\frac{N}{2}$, dobimo vrednosti naše transformiranke ravno na intervalu $[-f_c,f_c]$, kjer je
+$f_c$ Nyquistova frekvenca, ki se za naše vzorce uporablja kot meja frekvenčnega spektra.
+
+Nadalje nas bo zanimalo, koliko moči je vsebovane v frekvenčni komponenti okoli neke frekvence.
+To se bo računalo na ta način:
+\begin{align*}
+&P_n = 2*|H_n|^2 ,\quad n\neq 0 \\
+&P_0 = |H_0|^2
+\end{align*}
+
+\section{Iskanje najboljše metode}
+
+V tem delu bom predvsem poskušal Fourierovo transformacijo izvesti na več podobnih načinov in poskušal ugotoviti, kateri je najboljši.
+Pri izračunu nas najbolj skrbi "aliasing"- pojav, ko se vrednosti transformirka zunaj našega intervala $[-f_c,f_c]$ nekako vrinejo v interval in pokvarijo naš frekvenčni spekter. Druga težava bo, če bo naš signal $h(t)$ vzorčen na intervalu, na katerem ne naredi celoštevilskih večkratnikov periode in vrednost na enem koncu intervala ne bo enaka vrednosti na drugem koncu. Fourierova transformacija predpostavlja, da je signal periodičen in če vrednost na koncu intervala ni enaka kot na začetku, potem bi se to videlo kot skok(nezveznost) vsakič ko bi se skozi signal premaknili za velikost intervala.
+
+Za preverjanje algoritma bom najprej uporabil signal oblike:
+$h(t) = sin(2\pi t)$
+Saj za ta signal približno vemo, kaj bi moral biti odgovor:največja moči pri frekvenci 1(V frekvenčen spektru so na x osi frekvence $\nu$ in ne krožna frekvenca $\omega = 2\pi\nu$)
+\begin{figure}[H]
+\includegraphics[width=\linewidth]{prva/sin.pdf}
+\caption*{Tako izgleda naš signal. Interval je takšen, da funkcija na njem naredi točno 5 period}
+\end{figure}
+\begin{figure}[H]
+\includegraphics[width=\linewidth]{prva/sin0.pdf}
+\caption*{Že pri N=20 je rezultat kar smo pričakokvali(Vrh pri frekvenci 1, ostalih frekvenc pa praktično ni)}
+\end{figure}
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{prva/sin1.pdf}
+\caption*{Pri frekvenci 1 spet izrazito višja moč}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{prva/sin2.pdf}
+\caption*{Diskretne točke sem povezal, da se boljše vidi skok pri frekvenci 1}
+\end{subfigure}
+\end{figure}
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{prva/sin3.pdf}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{prva/sin4.pdf}
+\end{subfigure}
+\caption*{Pri zadnjih dveh grafih je bilo težko videti ali je vrh res točno pri enki, zato so tukaj isti grafi pobliže. In vrh je res(spet) pri frekvenci 1}
+\end{figure}
+\newpage
+V vseh teh primerih je bila frekvenca signala nižja od Nyquistove frekvence. Kaj pa, če temu ni tako?
+
+\begin{figure}[H]
+\includegraphics[width=\linewidth]{prva/nyq.pdf}
+\caption*{V tem primeru je $f_c = 0.8$}
+\end{figure}
+
+Opazimo pojav močnega aliasing-a - dobimo vrh moči pri frekvenci 0.6, kar je seveda čisto narobe, saj smo transformirali isto funkcijo kot doslej $h(t) = sin(2\pi t)$. Temu se bom poskusil izogniti tako, da bom vedno vzorčil tako na pogosto, da bo Nyquistova frekvenca višja od vsebovanih frekvenc. Pri kompliciranih signalih bo to težje in bom samo isto transformacijo izvedel še pri večjem N in pogledal ali so vrhovi moči še vedno pri istih frekvencah. Če so, bom rekel, da vzorčim dovolj na gosto.
+\newpage
+Poglejmo še kaj se zgodi, če interval na katerem vzorčim ne pokrije celostevilškega večkratnika periode(V tem primeru je interval $[0,4.66)$):
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{prva/asin.pdf}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{prva/asin0.pdf}
+\caption*{Vrh je že zamaknjen iz enke}
+\end{subfigure}
+\end{figure}
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{prva/asin1.pdf}
+\caption*{Spet je vrh zamaknjen}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{prva/asin2.pdf}
+\end{subfigure}
+\end{figure}
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{prva/asin3.pdf}
+\caption*{Na pobližnji sliki vidimo, da je vrh spet za malo zamaknjen}
+\end{subfigure}
+\end{figure}
+
+Ne samo, da je vrh zamaknjen - ostale frekvence imajo veliko večjo moč, kot so jo imele prej. Prej je bil vrh moči pri frekvenci 1 okoli enke  pa so ostale frekvence hitro padle in imele moč pod $10^{-10}$. Zdaj padajo veliko počasneje.
+
+Problem bom poskusil rešiti z okensko funkcijo(Window function), ki bo robove zvezno dala na nič in tako se bomo znebili nezveznosti na robu intervalov. Moj signal bom s to funkcijo pomnožil preden ga fourierovo transformiram.
+Uporabil bom tako imenovan Hann window, ki je definiran kot:
+\begin{equation*}
+w(n) = 0.5(1-cos(\frac{2\pi n}{N-1}))
+\end{equation*}
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{prva/hann.pdf}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{prva/hannsin.pdf}
+\end{subfigure}
+\end{figure}
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{prva/hannsin1.pdf}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{prva/hannsin2.pdf}
+\end{subfigure}
+\end{figure}
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{prva/hannsin3.pdf}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{prva/hannsin4.pdf}
+\end{subfigure}
+\end{figure}
+
+Kaj pa dobimo, če sedaj izračunamo inverz po dani formuli? Morali bi dobiti nazaj originalen signal.
+\begin{equation*}
+h_k = \frac{1}{N} \sum_{n=0}^{N-1}H_n exp(-2\pi i k n/N)
+\end{equation*}
+\begin{figure}[H]
+\includegraphics[width=\linewidth]{prva/inverz.pdf}
+\caption*{Lepo se pokriva - še ena potrditev, da algoritem deluje pravilno}
+\end{figure}
+
+\section{Ostali signali}
+\subsection{$h(t) = 5sin(3\pi t) + 4cos(9\pi t) - 2cos(3\pi t)$}
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{druga/sin.pdf}
+\caption*{Začetek in konec periode sem določil na oko}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{druga/sin1.pdf}
+\caption*{Spet že razlika med oknenjem ali ne}
+\end{subfigure}
+\end{figure}
+
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{druga/sin2.pdf}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{druga/sin3.pdf}
+\caption*{Zdaj še z očitno neperiodičnostjo}
+\end{subfigure}
+\end{figure}
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{druga/sin4.pdf}
+\caption*{Oknenje deluje veliko boljše}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{druga/sin5.pdf}
+\caption*{Ne izgleda, da bi tokrat oknenje razširlo vrhove}
+\end{subfigure}
+\end{figure}
+\begin{figure}[H]
+\centering
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{druga/inverz.pdf}
+\caption*{Inverzna formula deluje}
+\end{subfigure}
+\end{figure}
+
+\subsection{$h(t)=3sin(3\pi t) + 2sin(2.5 \pi t)$}
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{tretja/sin.pdf}
+\caption*{Začetek in konec periode sem določil na oko, nalašč dal zelo bližnji frekvenci}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{tretja/sin0.pdf}
+\end{subfigure}
+\end{figure}
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{tretja/sin1.pdf}
+\caption*{Vrhova brez oknenja ločljiva, z pa nerazločljiva.}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{tretja/sin2.pdf}
+\caption*{Kaj pa če je izbira intervala slaba?}
+\end{subfigure}
+\end{figure}
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{tretja/sin3.pdf}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{tretja/sin4.pdf}
+\caption*{Težko razločimo vrhova, z oknenjem pa še vedno sploh ne.}
+\end{subfigure}
+\end{figure}
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{tretja/probamo.pdf}
+\caption*{Večja frekvenca vzorčenja ne pomaga dosti}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{tretja/inverz.pdf}
+\end{subfigure}
+\end{figure}
+
+Sedaj smo videli, da oknenje ne nujno izboljša frekvenčnega spektra. Še vedno močno utiša višje frekvence, ki v resnici sploh niso prisotne, a malce širši vrhi pri prisotnih frekvencah v tem primeru povzročijo,
+da bližnjih frekvenc ne moremo čisto razločiti. Še vedno vidimo, da je najbolj vsebovana frekvenca nekje okoli 1.25-1.5 a ne moremo točno reči, kateri dve frekvenci to sta(Oziroma ali sta sploh dve ali je le ena etc.).
+Najbolje bo, da plottamo kar oboje: Transformacija signala pomnoženega z oknom nam bo dala lepo sliko, z transformacijo nespremenenjenga signala pa bomo lahko preverili, ali je oknenje kakšni bližnji frekvenci "zlepilo" skupaj.
+Morda bi izbira drugačne okenske funkcije to težavo rešila, a bom kar ostal pri trenutni.
+
+\section{Analize Bachove partite}
+
+Podan imamo zvok Bachove partite, ki traja 2.6 sekunde in smo ga vzorčili pri več različnih frekvencah. Primerjajmo kakšne so razlike:
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{tretja/bach882.pdf}
+
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{tretja/bach882okno.pdf}
+\end{subfigure}
+\caption*{Pri tej frekvenci je bila partita le nizki "hum". Grafi kažejo, da je veliko frekvenc še kar vsebovanih, največ pa jih je pri okoli 300 Hz. Vidimo, da oknenje tukaj ne spremeni bistveno slike.
+Morda spet kakšne vrhove združi, ampak tukaj nas bo tako ali tako bolj zanimalo, kje približno so najvišje frekvence in ne koliko točno različnih vrhov je tam(Ker jih je itak veliko). Verjetno pri tako redkem vzorčenju tudi pride do odtujitve, saj vidimo, da pri višjih frekvencah vsebovanost še ne pada proti ničli.}
+\end{figure}
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{tretja/bach1378.pdf}
+
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{tretja/bach1378okno.pdf}
+\end{subfigure}
+\caption*{Še vedno slišimo v glavnem le nekakšen "hum" a se že sliši, kako se ton spreminja.}
+\end{figure}
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{tretja/bach2756.pdf}
+
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{tretja/bach2756okno.pdf}
+\end{subfigure}
+\caption*{Pri tej frekvenci je melodija že zelo prepovznavna a še vedno deluje nekako tuja.}
+\end{figure}
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{tretja/bach5512okno.pdf}
+
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{tretja/bach11025okno.pdf}
+\end{subfigure}
+\caption*{Pri teh dveh frekvencah se v bistvu ne čuje več nobenih motenj. Na desni tudi vidimo, da pogostost frekvenc začenja padati. Najbrž se približujemo najvišje vsebovani frekvenci. Vrh je še vedno nekje pri 300. Sedaj sem se odločil plottati le oknjene transformacije, ker je pri 
+tej količini podatkov program že začel delati zelo počasi.}
+\end{figure}
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{tretja/bach44100.pdf}
+
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{tretja/bach441002.pdf}
+\end{subfigure}
+\end{figure}
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{tretja/bach441003.pdf}
+
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{tretja/bach441004.pdf}
+\end{subfigure}
+\caption*{Tukaj se lepo vidi, da frekvenc pod 200 in nad 5000 skorajda ni, vmes pa moč frekvenc hitro naraste, doseže pri 300 maksimum in začne potem počasi padat}
+\end{figure}
+
+\section{Akustični resonator}
+Za konec bomo analizirali še signali, ki smo jih dobili pri praktikumski vaji akustični resonator. Vzorčilo se je 1 sekundo pri 44.1kHz, vzorčili pa smo udarec po resonatorju(Kar vzbudi nekatera nihanja).
+Spet je bila število vrednosti veliko(44100) in je program delal tako počasi, da sem se odločil, da bom raziskal le oknjeno transformacijo iz podobnih razlogov kot prej, ker nas itak ne zanima točno
+koliko vrhov je pri neki frekvenci, če so zelo blizu, želimo pa jasneje videti katerih frekvenc je veliko oz. malo.
+\subsection{Močnejši udarec}
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{akus/mocnejsi1.pdf}
+
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{akus/mocnejsi2.pdf}
+\end{subfigure}
+\end{figure}
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{akus/mocnejsi3.pdf}
+
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{akus/mocnejsi4.pdf}
+\end{subfigure}
+\caption*{Vidimo, da je moč tudi najvišjih vrhov tukaj veliko manjša kot prej. Vseeno se približno da oceniti lokacije vrhov, ki so pribl. 30,100,400,4000,6000Hz.}
+\end{figure}
+
+\subsection{Slaboten udarec}
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{akus/slaboten1.pdf}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{akus/slaboten2.pdf}
+\end{subfigure}
+\end{figure}
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{akus/slaboten3.pdf}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{akus/slaboten4.pdf}
+\end{subfigure}
+\caption*{Pojavila sta se nova vrhova pri približno 300 in 60 Hz, vidimo tudi, da je veliko lokalnih maksimov tudi pri višjih frekvencah(Tudi pri 4000 in 6000 kot prej) a so ti tokrat veliko manjši kot ostali}
+\end{figure}
+
+\subsection{Zelo Močan udarec}
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{akus/zelo1.pdf}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{akus/zelo2.pdf}
+\end{subfigure}
+\end{figure}
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{akus/zelo3.pdf}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{akus/zelo4.pdf}
+\end{subfigure}
+\caption*{Vrh je samo pri 100 in nekje pri 3500}
+\end{figure}
+
+Težko je reči, kateri udarec je dal najbolj pravilne rezultate. Pri zelo močnem udarcu se je morda detektor celo premaknil ali kaj podobnega, kar bi lahko spremenilo rezultate. Pri slabotnem udarcu so bili mogoče signali tako šibki, da je vidno še kakšno ozadje(Ne spomnem se kako dobro je bil resonator zvočno izoliran). 
+Verjetno je najbolje udariti nekje vmes, čemur je v tem primeru najbližje močnejši udarec, a lahko le ugibam. Najbolje bi bilo analizirati še več signalov resonatorja in videti, pri katerih frekvencah so vrhovi v veliko udarcih. Npr. v tem primeru je vrh pri 100Hz pri vsakem, medtem, ko jih je veliko oboje ob slabotnem in močnejšem udarcu, tako da bi rekel, da so ta ujemanja najbolj pravilne frekvence.
+\end{document}
+
+

@@ -1,0 +1,237 @@
+\documentclass{article}
+
+\title{Matemati{\v c}no-fizikalni praktikum: Resevanje PDE z razvojem po lastnih funkcijah: Poisson}
+\author{Andrej Kolar-Po{\v z}un}
+
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{subcaption}
+\usepackage{caption}
+\usepackage{float}
+\usepackage{physics}
+
+\errorcontextlines 10000
+\begin{document}
+\pagenumbering{gobble}
+\maketitle
+\newpage
+\pagenumbering{arabic}
+
+\section{Uvod}
+
+Sedaj se bomo lotili enačbe:
+\begin{equation*}
+\nabla^2 v = - \frac{p'}{\eta}
+\end{equation*}
+Vemo, da za pretok velja Poiseuillov zakon:
+\begin{equation*}
+\Phi = \int v dS = C \frac{p' S^2}{8 \pi \eta}
+\end{equation*}
+Želeli bi določiti C za polkrožno cev. Robni pogoji so, da je hitrost 0 na robu cevi.
+S primerno uvedbo novih spremenljivk se naša PDE in enačba za C poenostavi:
+\begin{align*}
+&\nabla^2 u(x,\phi) = -1 \\
+&C = 8\pi \int \int \frac{u(x,\phi) x dx d\phi}{(\pi/2)^2}
+\end{align*}
+Z nekaj računanja pridemo do končnega izraza za u:
+\begin{align*}
+u(x,\phi) = \sum_{ms} \frac{A_{ms} g_{ms}(x,\phi)}{y_{ms}^2}
+\end{align*}
+Kjer seštevamo po $m=0,1,2...$ in $s=1,2,...$.
+$y_{ms}$ je s-ta ničla 2m+1-te besslove funkcije,
+$g_{ms} = J_{2 m+1}(y_{ms}x) sin(2m+1)\phi$ in 
+$A_{ms} = \frac{(1,g_{ms})}{(g_{ms},g_{ms})}$
+
+Za iskani koeficient dobimo:
+
+\begin{align*}
+&C = 8 \sum_{ms} \Big( \frac{8}{\pi} \frac{I_{ms}}{(2m+1)y_{ms}J_{2m+2}(y_{ms})}\Big)^2 \\
+& I_{ms} = \frac{4(2m+1)}{y_{ms}} \sum_{k=m+1}^{\infty} \frac{k J_{2k} (y_{ms})}{(4k^2-1)}
+\end{align*}
+
+\newpage
+\section{Reševanje}
+
+Najprej preverimo, kako se rešitev spreminja, če spreminjam koliko členov bom seštel po m-ju(Kar bom označeval kar kot m). 
+Število seštetih členov po s in k bom zaenkrat dal na recimo 50, pozneje pa spreminjal še tole.
+
+\begin{figure}[H]
+\includegraphics[width=\linewidth]{vecm.pdf}
+\caption*{Vidimo, da vrednost vsote konvergira proti neki vrednosti in to kar hitro, sešteti je treba le okoli 10 členov po m.}
+\end{figure}
+
+\begin{figure}[H]
+\includegraphics[width=\linewidth]{vecs.pdf}
+\caption*{V tem primeru je konvergenca podobno hitra, tokrat je bilo treba sešteti le okoli 20 členov.}
+\end{figure}
+
+\begin{figure}[H]
+\includegraphics[width=\linewidth]{veck.pdf}
+\caption*{Tudi v k-ju je treba sešteti podobno malo členov. Velikosti členov v tej vsoti so zelo odvisne od m, a je konvergenca tako hitra, da se s tem sploh ne rabimo posebej mučiti.}
+\end{figure}
+
+Ugotovili smo, da je C za polkrožno cev enak približno 0.758.
+
+Poglejmo sedaj kako izgleda hitrostni profil.
+Računal bom kar $u(x,\phi)$ kar je samo skaliranje dejanske hitrosti.
+Vemo naslednje:
+\begin{align*}
+&u(x,\phi) = \sum_{ms} \frac{A_{ms} g_{ms}(x,\phi)}{y_{ms}^2} \\
+&A_{ms} = \frac{(1,g_{ms})}{(g_{ms},g_{ms})} \\
+& (1,g_{ms}) = \frac{2 I_{ms}}{2m+1} \\
+& (g_{ms},g_{ms}) = \frac{\pi}{4} J_{2m+2}^2(y_{ms}) 
+\end{align*}
+
+\begin{figure}[H]
+\includegraphics[width=\linewidth]{profilkaj.pdf}
+\caption*{Število seštetih členov je isto kot pri računanju koeficienta. Spreminjanje tega števila profila ni veliko spremenilo.}
+\end{figure}
+\begin{figure}[H]
+\includegraphics[width=\linewidth]{profilres.pdf}
+\caption*{Ista silka z več barvami.}
+\end{figure}
+
+\newpage
+\section{Dodatna naloga}
+
+Naša naloga je ponoviti vajo za cev s pravokotnim presekom s stranicami a in b.
+Rešujemo:
+\begin{equation*}
+\frac{\partial ^2 v}{\partial x^2} + \frac{\partial ^2 v}{\partial y^2} = - \frac{p'}{\eta}
+\end{equation*}
+
+V navodilih je koeficient ze izražen kot:
+\begin{equation*}
+C = 2\pi \frac{b}{a}\Big( \frac{1}{3} - \frac{b}{a} \frac{64}{\pi^5} \sum_{n=1}^{\infty} \frac{tanh(\frac{a}{b} \frac{(2n-1)\pi}{2})}{(2n-1)^2}\Big)
+\end{equation*}
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{druga1.pdf}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{druga3.pdf}
+\end{subfigure}
+\caption*{Čudni rezultati. Razmerje 2 ima isti koeficient kot 1? Ni pa to isto kot 1/2? Za majhna razmerja pa je koeficient že čez ena. Konvergira pa seveda hitro, saj v vsoti delimo z indeksom na peto potenco, nad ulomkom pa je omejena funkcija.} 
+\end{figure}
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{druga2.pdf}
+\end{subfigure}
+\caption*{Koeficienti za več razmerij, kar bom primerjal še z drugo metodo. Plottal sem le od 1 naprej, za recipročne vrednosti razmerja pa po simetriji enačbe vemo, da bi moralo priti enako}
+\end{figure}
+
+
+
+
+Sedaj bom to rešil tudi na način iz prve vaje. Naše lastne funkcije so tokrat:
+\begin{equation*}
+g_{mn}(x,y) = sin \frac{n\pi x}{a} sin \frac{m \pi y}{b}
+\end{equation*}
+Ki avtomatično že zadostijo robnim pogojem, da je hitrost 0 na robu cevi.
+Najprej bom s susbstitucijo $u = v \frac{\eta}{p'}$ enačbo prevedel na obliko:
+\begin{equation*}
+\nabla^2 u = -1
+\end{equation*}
+
+Kot prej imamo:
+\begin{align*}
+&1 = \sum_{mn} A_{mn} sin \frac{n\pi x}{a} sin \frac{m \pi y}{b} \\
+&A_{mn} = \frac{(1,g_{mn})}{(g_{mn},g_{mn})}  \\
+& (1,g_{mn}) = \frac{a}{n \pi} (1- (-1)^n) \frac{b}{m \pi} (1- (-1)^m) \\
+& (g_{mn},g_{mn}) = \frac{ab}{4} 
+\end{align*}
+
+Iz zgornjih enačb sledi, da bodo neničelni le tisti členi, kjer bodo n in m lihi.
+Takrat bo $A_{mn} = \frac{16}{nm \pi^2}$
+
+Z nastavkom za u oblike $u(x,y) = \sum B_{mn} g_{mn}$ , vstaljanjem v enačbo
+in enačenjem členov dobimo:
+\begin{equation*}
+u(x,y) = \sum_{n,m lihi} \frac{16}{nm \pi ^2}\frac{1}{(n \pi /a)^2 + (m \pi /b)^2} g_{mn}
+\end{equation*}
+
+Sedaj uporabimo še enačbo:
+\begin{equation*}
+C = \frac{8 \pi \eta}{p' S^2} \int u \frac{p'}{\eta} dx dy
+\end{equation*}
+
+Poenostavimo:
+\begin{equation*}
+C = \frac{32*16}{\pi^3 ab} \sum_{lihi} \frac{1}{(nm)^2 ( (n\pi /a)^2 + (m \pi /b)^2)}
+\end{equation*}
+
+Malo še preoblikujmo, da dobimo v formuli razmerje a/b:
+\begin{equation*}
+C = \frac{32*16}{\pi^3} \sum_{lihi} \frac{1}{(nm)^2 ( b/a(n\pi )^2 + a/b(m \pi )^2)}
+\end{equation*}
+
+
+Kot prej bom najprej preveril koliko členov je treba šešteti. Pod ulomkom sta n/m spet na peto potenco in se pričakuje, da torej zelo malo.
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{moja.pdf}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{moja2.pdf}
+\end{subfigure}
+\caption*{Oboje hitro konvergira kot smo pričakovali. Spet pa vidimo, da a/b in b/a nimata istega koeficienta, kar je čudno.} 
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{moja3.pdf}
+\end{subfigure}
+\caption*{Podobna oblika krivulje kot pri drugem načinu}
+\end{figure}
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{moja4.pdf}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{moja5.pdf}
+\end{subfigure}
+\caption*{Vidimo, da se po približno 1.5 krivulji zbližata in dajata potem podobne rešitve. Pod 1 so razlike velike, formula v navodilih zelo naraste.} 
+\end{figure}
+
+Za konec si poglejmo še nekaj profilov hitrosti. Za a bom izbral 1, b pa bom spreminjal.
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{profilcek1.pdf}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{profilcek2.pdf}
+\end{subfigure}
+\end{figure}
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{profilcek3.pdf}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{profilcek4.pdf}
+\end{subfigure}
+\end{figure}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\end{document}

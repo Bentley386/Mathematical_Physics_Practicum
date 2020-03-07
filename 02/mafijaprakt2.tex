@@ -1,0 +1,361 @@
+\documentclass{article}
+
+\title{Mafija praktikum: Naklju{\v c}ni sprehodi}
+\author{Andrej Kolar-Po{\v z}un}
+
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{subcaption}
+\usepackage{caption}
+\usepackage{float}
+
+\errorcontextlines 10000
+\begin{document}
+\pagenumbering{gobble}
+\maketitle
+\newpage
+\pagenumbering{arabic}
+
+\section{Uvod}
+V temle dokumentu se bom lotil reševanja druge naloge matematično-fizikalnega praktikuma. Navodila za nalogo in potrebni podatki so v isti mapi pod imenom
+"Navodila.pdf".
+Naloge se bom lotil s Pythonom 3.5 (SciPy knjižnice).
+
+\section{Porazdelitvi}
+
+Na vsakem koraku moramo torej izbrati dolžino premika ter kot. Za kot bo preprosto in bom uporabil random number generater, ki generira števila med 0 in 1(ne vključuje pa enke) pomnožen z $2\pi$.
+Za dolžino bo malce bolj zapleteno, izbirati jo bom moral po porazdelitvi:
+\begin{equation*}
+\rho(l) = A*l^{-\mu}
+\end{equation*}
+Kjer je A normalizacijska konstanta in $1<\mu<3$ parameter. Za možne skoke bom vzel interval $(1,\infty)$, saj bi za interval $(0,\infty)$ integral verjetnostne porazdelitve divergiral.
+
+Izračunajmo sedaj A:
+\begin{equation*}
+1 = A* \int_1^\infty l^{-\mu} = \frac{A}{\mu-1} 
+\end{equation*}
+\begin{equation*}
+ A = \mu-1
+\end{equation*}
+
+Torej imamo $\rho(l)=(\mu-1)l^{-\mu}$
+
+Potrebovali bomo še kumulativno porazdelitev:
+
+\begin{equation*}
+F(l) = \int_1^l \rho(t)dt = (\mu-1)*\int_1^l t^{-\mu}dt = (1-l^{-\mu+1})
+\end{equation*}
+
+Poiščimo inverz. Označimo, da je $F(l)=r$ r bo med 0 in 1 po definiciji kumulativne porazdelitve.
+
+\begin{align*}
+1-r &= l^{-\mu+1} \\
+\log(1-r) &= (1-\mu)*\log(l) \\
+ (1-r)^{\frac{1}{1-\mu}}  &= l
+\end{align*}
+
+Torej dobili smo recept po katerem lahko izbiramo dolžine.
+$l =  (1-r)^{\frac{1}{1-\mu}}$
+
+r bo naključno število med 0 in 1, dobili pa bomo neko dolžino med 1 in $\infty$ po dani porazdelitvi.
+
+\section{Sprehodi}
+
+Sedaj bom za nekatere izbrane parametre $\mu$ izvedel naključne sprehode. To bom storil za več korakov n in pogledal kako sprehodi izgledajo.
+Poskusil bom tudi ugotoviti kako je razmazanost $\sigma^2$ odvisna od časa t. Čas bom meril tako, kot da je hitrost sprehodov konstanta, torej prepotovana pot bo enaka pretečenem času(Brezdimenzijsko). Razmazanost seveda pri tej porazdelitvi ni definirana, ker povprečje kvadrata
+divergira. Namesto te ponavadi uporabljene definicije bom računal MAD(Median Abosulte Deviation), ki je definirana kot
+
+\begin{equation*}
+MAD= median_i(|X_i- median_jX_j|)
+\end{equation*}
+
+Za kakih približno 100 sprehodov bom izračunall razmazanosti po določenem času in tako pri več časih poskusil ugotoviti $\sigma^2(t)$.
+\subsection{$\mu = 2.5$}
+
+\begin{figure}[H]
+\includegraphics[width=\linewidth]{mu25/mu25n101.pdf}
+\end{figure}
+\begin{figure}[H]
+\includegraphics[width=\linewidth]{mu25/mu25n102.pdf}
+\end{figure}
+\begin{figure}[H]
+\includegraphics[width=\linewidth]{mu25/mu25n103.pdf}
+\end{figure}
+\begin{figure}[H]
+\includegraphics[width=\linewidth]{mu25/mu25n1001.pdf}
+\end{figure}
+\begin{figure}[H]
+\includegraphics[width=\linewidth]{mu25/mu25n1002.pdf}
+\end{figure}
+\begin{figure}[H]
+\includegraphics[width=\linewidth]{mu25/mu25n1003.pdf}
+\end{figure}
+\begin{figure}[H]
+\includegraphics[width=\linewidth]{mu25/mu25n10001.pdf}
+\end{figure}
+\begin{figure}[H]
+\includegraphics[width=\linewidth]{mu25/mu25n10002.pdf}
+\end{figure}
+\begin{figure}[H]
+\includegraphics[width=\linewidth]{mu25/mu25n10003.pdf}
+\end{figure}
+\begin{figure}[H]
+\includegraphics[width=\linewidth]{mu25/mu25n100001.pdf}
+\end{figure}
+\begin{figure}[H]
+\includegraphics[width=\linewidth]{mu25/mu25n100002.pdf}
+\end{figure}
+\begin{figure}[H]
+\includegraphics[width=\linewidth]{mu25/mu25n100003.pdf}
+\end{figure}
+
+\begin{align*}
+\sigma(100) &\approx 10 \\
+\sigma(200) &\approx 16 \\
+\sigma(500) &\approx 30 \\
+\sigma(1000) &\approx 45 \\
+\sigma(5000) &\approx 138 \\
+\sigma(10000) &\approx 214
+\end{align*}
+
+Zvezo iscemo v obliki $\sigma^2(t)=t^\gamma$
+Iz teh podatkov sem s pomočjo Pythona(funkcija uporablja nelinearno metodo najmanjših kvadratov), da je $\gamma \approx 1.16$
+Po dani formuli, bi moral rezultat biti $\gamma = 4-\mu = 1.5$
+
+
+Zapoznela opazka:
+Pravzaprav mi ne bi bilo treba računati razmazanosti pri različnih časih in bi lahko na primer namesto tega samo večkrat opravil sprehode pri večjem času(10000). S tem bi si tudi prihranil malo dela in mi ne bi do $\gamma$ prišel le z rešitvijo enostavne enačbe $\sigma(t) = t^{\gamma/2}$, kjer je edina neznanka $\gamma$.Verjetno bi bilo to še natančneje kot kar sem storil tukaj. Vseeno sem naredil dokaj veliko število sprehodov za izračun $\sigma(t=10000)$ in izračunana $\gamma$ se temu dobro prilega.
+
+\subsubsection{Porazdelitev dolžin}
+
+Poglejmo si se vizualno kako pogosti so skoki različnih dolžin. Pri naslednji sliki je bilo narejenih 10000 korakov.
+Velika večina teh je bila seveda majhnih in prav to območje je prikazano na histogramu:
+
+\begin{figure}[H]
+\includegraphics[width=\linewidth]{mu25/histogram2.pdf}
+\end{figure}
+Vidi se, da so dolžine porazdeljene potenčno in so seveda najmanjši skoki najpogostejši.
+
+Mimogrede, ta histogram ni narejen po točno istih podatkih kot so prikazani na kateri izmed prejšnjih slik, so pa podatki pridobljeni na isti način.
+
+\subsection{$\mu=1.5$}
+Ponovimo vajo za dručaen $\mu$ in poglejmo kaj se zgodi.
+
+\begin{figure}[H]
+\includegraphics[width=\linewidth]{mu15/mu15n101.pdf}
+\end{figure}
+\begin{figure}[H]
+\includegraphics[width=\linewidth]{mu15/mu15n102.pdf}
+\end{figure}
+\begin{figure}[H]
+\includegraphics[width=\linewidth]{mu15/mu15n1001.pdf}
+\end{figure}
+\begin{figure}[H]
+\includegraphics[width=\linewidth]{mu15/mu15n1002.pdf}
+\end{figure}
+\begin{figure}[H]
+\includegraphics[width=\linewidth]{mu15/mu15n10001.pdf}
+\end{figure}
+\begin{figure}[H]
+\includegraphics[width=\linewidth]{mu15/mu15n10002.pdf}
+\end{figure}
+\begin{figure}[H]
+\includegraphics[width=\linewidth]{mu15/mu15n100001.pdf}
+\end{figure}
+\begin{figure}[H]
+\includegraphics[width=\linewidth]{mu15/mu15n100002.pdf}
+\end{figure}
+
+\begin{align*}
+\sigma(100) &\approx 130 \\
+\sigma(200) &\approx 251 \\
+\sigma(500) &\approx 620 \\
+\sigma(1000) &\approx 1301 \\
+\sigma(5000) &\approx 5831 \\
+\sigma(10000) &\approx 13423
+\end{align*}
+
+Dobimo, da $\gamma= 2.1$, kar je dokaj blizu navodilom, ki pravijo, da je $\gamma = 2$.
+
+\subsubsection{Porazdelitev dolžin}
+
+Slika je seveda podobna prejšnjem primeru, lahko pa dodam, da so v tem primeru le 2 dolžini bili občutno daljši od ostalih(obe daljši od $10^7$
+
+\begin{figure}[H]
+\includegraphics[width=\linewidth]{mu15/histogram2.pdf}
+\end{figure}
+
+Vidimo, da je število dolžin me 1 in 2 že pol manj kot pri prejšnjem primeru. No sicer bom bolj nazorno primerjavo naredil na koncu.
+
+\section{$\mu=2.2$}
+
+\begin{figure}[H]
+\includegraphics[width=\linewidth]{mu22/mu22n101.pdf}
+\end{figure}
+\begin{figure}[H]
+\includegraphics[width=\linewidth]{mu22/mu22n102.pdf}
+\end{figure}
+\begin{figure}[H]
+\includegraphics[width=\linewidth]{mu22/mu22n1001.pdf}
+\end{figure}
+\begin{figure}[H]
+\includegraphics[width=\linewidth]{mu22/mu22n1002.pdf}
+\end{figure}
+\begin{figure}[H]
+\includegraphics[width=\linewidth]{mu22/mu22n10001.pdf}
+\end{figure}
+\begin{figure}[H]
+\includegraphics[width=\linewidth]{mu22/mu22n10002.pdf}
+\end{figure}
+\begin{figure}[H]
+\includegraphics[width=\linewidth]{mu22/mu22n100001.pdf}
+\end{figure}
+\begin{figure}[H]
+\includegraphics[width=\linewidth]{mu22/mu22n100002.pdf}
+\end{figure}
+
+\begin{align*}
+\sigma(100) &\approx 17 \\
+\sigma(200) &\approx 29 \\
+\sigma(500) &\approx 59 \\
+\sigma(1000) &\approx 93 \\
+\sigma(5000) &\approx 321 \\
+\sigma(10000) &\approx 597
+\end{align*}
+
+Dobim $\gamma = 1.4$, formula pa napoveduje $\gamma = 4-\mu = 4-2.2=1.8$
+
+\subsubsection{Porazdelitev dolžin}
+
+Spet je velika večina dolžin majhnih, le ena vrednost občutno odsopa in je nad 1000.
+
+\begin{figure}[H]
+\includegraphics[width=\linewidth]{mu22/histogram2.pdf}
+\end{figure}
+
+
+\section{Primerjava}
+
+Poglejmo si še enkrat  slike iz različnih $\mu$
+\begin{figure}[H]
+\includegraphics[width=\linewidth]{mu25/mu25n100001.pdf}
+\end{figure}
+\begin{figure}[H]
+\includegraphics[width=\linewidth]{mu15/mu15n100001.pdf}
+\end{figure}
+\begin{figure}[H]
+\includegraphics[width=\linewidth]{mu22/mu22n100001.pdf}
+\end{figure}
+
+Vidimo torej, da se pri manjšem $\mu$ dogajajo pogosteje daljši skoki in se torej manj časa zadržujemo na nekem območju. Verjetno bo podobno pokazal histogram. 
+
+\begin{figure}[H]
+\includegraphics[width=\linewidth]{histogram.pdf}
+\end{figure}
+
+In res je.
+
+\section{Sprehajanje v kartezičnem sistemu}
+
+Pogledal si bom še na hitro samo kako izgledajo slike, če se sprehajamo v kartezičnem sistemu po receptu
+\begin{align*}
+x \rightarrow&  x + f(R) \\
+y \rightarrow&  y + f(R) \\  R \in& [-1/2,1/2) 
+\end{align*}
+Kjer je R naključna spremenljivka in f neka funkcija.
+
+\begin{figure}[H]
+\includegraphics[width=\linewidth]{drugace/x.pdf}
+\caption*{Vidi se(kot je logično), da ni nobenih velikih skokov, saj se koordinati lahko spremenijo le za določeno majhno vrednost}
+\end{figure}
+
+\begin{figure}[H]
+\includegraphics[width=\linewidth]{drugace/xabs.pdf}
+\caption*{Seveda se v tem primeru stvar lahko pomika le desno in navzgor. Ker je porazdelitev za skok v horizntalno in vertikalno smer iste oblike izgleda kot da stvar potuje v neki liniji}
+\end{figure}
+
+\begin{figure}[H]
+\includegraphics[width=\linewidth]{drugace/xabs2.pdf}
+\caption*{Pobližji pogled še malo lepše prikaže kako izgleda, kot da bi se sprehajali po neki namišljeni črti}
+\end{figure}
+
+\begin{figure}[H]
+\includegraphics[width=\linewidth]{drugace/1zx.pdf}
+\caption*{Seveda so v tem primeru večji skoki veliko pogostejši, saj ta funkcija divergira okoli ničle}
+\end{figure}
+
+\begin{figure}[H]
+\includegraphics[width=\linewidth]{drugace/1zxabs.pdf}
+\caption*{Dobimo sprehod oblike nekakšne zlomljenih črt saj se kdaj pa kdaj zgodi, da v kakšno smer skočimo za zelo veliko vrednost}
+\end{figure}
+
+\begin{center}
+\begin{tabular}{| c | c | c | c | c | c | c |}
+\hline
+$f(x)$ & $\sigma(100)$ & $\sigma(500)$ & $\sigma(1000)$ & $\sigma(5000)$ & $\sigma(10000)$ & $\gamma$ \\
+\hline
+\hline
+$x$ & $2.1$ & $4.8$ & $6.9$ & $15.6$ & $20.6$ & $0.64$ \\
+$|x|$ & $0.3$ & $0.8$ & $1.2$ & $2.5$ & $3.6$ & $0.19$ \\
+$\frac{1}{x}$ & $33.2$ & $135$ & $245$ & $919.1$ & $1569.7$ & $1.6$ \\
+$\frac{1}{|x|}$ & $14.1$ & $39.2$ & $61.5$ & $220.8$ & $315.34$ & $1.25$ \\
+\hline
+\end{tabular}
+\end{center}
+
+\section{Razmazanost}
+
+Poglejmo si za konec še kako se razmazanost spreminja s časom za različne vrste sprehodov.
+
+\begin{figure}[H]
+\includegraphics{vse.pdf}
+\end{figure}
+
+\section{Dodatna naloga}
+
+Zdaj lahko naš delec miruje za nek potenčno porazdeljen čas preden se spet premakne.
+Porazdelitev časa čakanja ima isto obliko kot jo je imela naša prva porazdelitev dolžin(s drugačnim parametrom), torej že vemo kakšna je:
+\begin{equation*}
+\rho(t) =(\nu-1)t^{-\nu}
+\end{equation*}
+Čase pa bomo s pomočjo našega generatorja naključnih števil, določevali podobno kot prej:
+\begin{equation*}
+t = (1-r)^{\frac{1}{1-\nu}}
+\end{equation*}
+Kjer je r naključna spremenljivka med 0 in 1. in $1<\nu<2$
+Za porazdelitev dolžin si bom izbral kar $\rho(l) = (\mu-1)*l^{-\mu}$, kjer je $\mu=2.2$.
+
+\begin{figure}[H]
+\includegraphics[width=\linewidth]{brez.pdf}
+\caption*{Podobna slika, kakršno smo že imeli. Tukaj samo za hitro primerjavo. Mimogrede, v tem času je bilo narejenih ~2200 korakov}
+\end{figure}
+\begin{figure}[H]
+\includegraphics[width=\linewidth]{z.pdf}
+\caption*{Sprehodi z "sticking time". Seveda, je manj skokov in prepotovane poti, saj veliko časa stojimo. Narejenih je bilo le ~30 korakov}
+\end{figure}
+
+Poglejmo, kako je z razmazanostjo v tem primeru.
+\begin{align*}
+\sigma(100) &\approx 4.2 \\
+\sigma(500) &\approx 9.2 \\
+\sigma(1000) &\approx 11.8 \\
+\sigma(5000) &\approx 26.1 \\
+\sigma(10000) &\approx 33.6
+\end{align*}
+Dobimo, da $\gamma = 0.76$, kar je po pričakovanju manjše od primera brez sticking time-a, kjer je $\gamma = 1.4$
+
+\begin{figure}[H]
+\includegraphics[width=\linewidth]{zadnje.pdf}
+\end{figure}
+
+Za konec bi mogoče samo še bilo zanimivo videti, kako se število korakov spreminja s časom za ta dva primera(Z in brez sticking time)
+
+\begin{figure}[H]
+\includegraphics[width=\linewidth]{zadnjeres.pdf}
+\end{figure}
+To sem plottal tukaj, samo da si boljše predstavljamo, zares koliko več korakov naredimo v istem času, če ne upoštevamo sticking time-a. Vidi se seveda, da občutno več. Mogoče bi samo še omenil zakaj na grafu modra črta seže malce dlje v x smer kot črna. To je zato, ker sem program nastavil tako, da se neha sprehajati ko prekoračimo čas 10000 in jih potem nariše. Odvisno torej od tega kako dolgo traja zadnji korak, se je lahko sprehajanje končalo tudi od času, ki je občutno večji od 10000.
+
+\end{document}
+
+

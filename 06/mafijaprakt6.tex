@@ -1,0 +1,522 @@
+\documentclass{article}
+
+\title{Matemati{\v c}no-fizikalni praktikum: Ena{\v c}be hoda}
+\author{Andrej Kolar-Po{\v z}un}
+
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{subcaption}
+\usepackage{caption}
+\usepackage{float}
+\usepackage{physics}
+
+\errorcontextlines 10000
+\begin{document}
+\pagenumbering{gobble}
+\maketitle
+\newpage
+\pagenumbering{arabic}
+
+\section{Uvod}
+
+Dano imamo diferencialno enačbo, ki opisuje časovno odvisnost temperature v nekem stanovanju:
+\begin{equation*}
+\frac{dT}{dt} = -k(T-T_{zun})
+\end{equation*}
+
+Enačba je rešljiva analitično z rešitvijo:
+\begin{equation*}
+T(t)=T_{zun} + e^{-kt}(T(0) - T_{zun})
+\end{equation*}
+
+Take enačbe, ki opisujejo razvoj spremenljivk po neodvisnih spremenljivkah so enačbe hoda.
+Sedaj bom to enačbo poskusil na več načinov rešiti numerično.
+
+\newpage
+
+\section{Numerično reševanje enačbe}
+
+\subsection{k=0.1}
+Enačbo bom rešil za začetni pogoj $T(0) = 21$, za parametre pa bom izbral $T_{zun} = -5$ in $k=0.1$.
+Naslednje metode bodo vse delovale tako, da bomo delali ekvidistančne korake po času in gledali kaj se dogaja s temperaturo.
+Dolžino koraka bom označeval s $h$.
+
+Najlažja metoda, katero bom najprej uporabil je ekspllicitna Eulerjeva metoda:
+\begin{equation*}
+y(x+h) = y(x) + h \frac{dy}{dx}\Big{|}_x 
+\end{equation*}
+Vstavimo tole aproksimacijo za odvod v našo diferencialno enačbo:
+\begin{align*}
+\frac{T(t+h)-T(t)}{h} &= -k(T(t) - T_{zun}) \\
+T(t+h) &= T(t) - hk(T(t) - T_{zun}) 
+\end{align*}
+
+Vnaprej se opravičujem za nekonzistentnost barv. V grafih ena barva ne ustreza vedno določenem h-ju. Pri grafih torej vedno poglejte legendo in se prepričajte, katera krivulja ustreza kateri barvi.
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{euler/4.pdf}
+\caption*{Pri koraku h=0.2 in nižjih, razlika med pravo vrednostjo ni tako "makroskopsko" opazna, vidimo pa, da se pri h=0.5 nekaj že pozna pri h=1 pa še bolj. Čas je tukaj prikazan le do 20, ker se potem krivulja asimptotsko približuje zunanji temperaturi -5 in so razlike manj opazne.}
+\end{figure}
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{euler/5.pdf}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{euler/6.pdf}
+\end{subfigure}
+\caption*{Absolutne vrednosti razlike aprosksimacij od pravih vrednosti. Seveda večji korak pomeni manjšo natančnost. Opazimo tudi, da se razlike pri večjem času potem zmanjšujejo.}
+\end{figure}
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{euler/7.pdf}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{euler/8.pdf}
+\end{subfigure}
+\caption*{Relativna napaka v okolici določene točke zelo naraste, saj ima funkcija T(t) ničlo, torej delimo z nečim blizu ničle, kar je lahko veliko tudi pri majhni napaki}
+\end{figure}
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{euler/9.pdf}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{euler/10.pdf}
+\end{subfigure}
+\caption*{Na teh grafih pobližje vidimo, kakšne so res relativne napake za različne metode.i}
+\end{figure}
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{euler/11.pdf}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{euler/12.pdf}
+\end{subfigure}
+\caption*{Kaj se zgodi, če je korak prevelik? Lahko skočimo na določeno vrednost in pri njej kar ostanemo, ali pa stalno skačemo med določenemi vrednostmi. V vsakem primeru zelo narobe.}
+\end{figure}
+\newpage
+
+Preizkusil bom še simetrizirano Eulerjevo metodo, ki naj bi bila natančnejša a bolj nestabilna in pri kateri je približek za prvi odvod takšen:
+\begin{equation*}
+y'(x) = \frac{y(x+h) - y(x-h)}{2h}
+\end{equation*}
+Naša diferencialna enačba torej postane:
+\begin{align*}
+\frac{T(t+h)-T(t-h)}{2h} &= -k(T(t) - T_{zun}) \\
+T(t+h) &= -2hk(T(t) - T_{zun}) + T(t-h) \\
+T(t) &= -2hk(T(t-h) - T_{zun}) + T(t-2h)  
+\end{align*}
+
+Zdaj torej za račun vrednosti T pri določenem času potrebujemo vrednosti T pri dveh različnih prejšnjih časih. Imamo pa samo začetni pogoj T(0), zato bom izračunal T(h) po analitični rešitvi diferencalne enačbe, za nadaljne čase pa uporabljal to metodo.
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{euler2/1.pdf}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{euler2/2.pdf}
+\end{subfigure}
+\caption*{Vidimo, da je metoda najprej zelo natančna, potem pa za višje korake podivja}
+\end{figure}
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{euler2/3.pdf}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{euler2/4.pdf}
+\end{subfigure}
+\caption*{Tukaj se še bolje vidi kako napaka podivja. Opazimo, da se nenatančnost počasi začenja tudi za h=0.5}
+\end{figure}
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{euler2/5.pdf}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{euler2/6.pdf}
+\end{subfigure}
+\caption*{Absolutne napake so pri tej metodi veliko manjše od prejšnje metode.(Tam kjer ne začne metoda postajati nestabilna)}
+\end{figure}
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{euler2/7.pdf}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{euler2/8.pdf}
+\end{subfigure}
+\caption*{Relativne napake. Levi vrh je spet posledica tega, da ima funkcija T(t) ničlo.}
+\end{figure}
+\newpage
+
+Rad bi preizkusil še eno izboljšavo Eulerjeve metode in sicer:
+\begin{equation*}
+y(x+h) = y(x)+\frac{h}{2}\Big(\frac{dy}{dx}\Big{|}_x + \frac{dy}{dx}\Big{|}_{x+h}\Big)
+\end{equation*}
+V naši enačbi se to prevede na:
+\begin{equation*}
+T(t+h) = \frac{T(t) (1-\frac{kh}{2}) + khT_{zun}}{1+\frac{kh}{2}}
+\end{equation*}
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{euler2/9.pdf}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{euler2/10.pdf}
+\end{subfigure}
+\caption*{Celo za h=1 razlike nisem opazil, opazila se je šele pri h=5.}
+\end{figure}
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{euler2/11.pdf}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{euler2/12.pdf}
+\end{subfigure}
+\caption*{Brez kakšnih nestabilnosti so napake majhne(Sicer vseeno večje kot pri prejšnji metodi), tudi pri večjih korakih.}
+\end{figure}
+\newpage
+Zdaj bom preveril še znano metodo Runge-Kutta 4. reda:
+\begin{align*}
+k1 =& f(x,y(x)) \\
+k2 =& f(x+0.5h,y(x)+0.5hk_1) \\
+k3 =& f(x+0.5h,y(x)+0.5hk_2) \\
+k4 =& f(x+h,y(x)+hk_3) \\
+y(x+h) =& y(x) + \frac{h}{6} (k_1 + 2k_2 + 2k_3 + k_4) 
+\end{align*}
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{euler2/13.pdf}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{euler2/14.pdf}
+\end{subfigure}
+\caption*{Izgleda v redu. Natančno brez kakih čudnih obnašanj}
+\end{figure}
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{euler2/15.pdf}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{euler2/16.pdf}
+\end{subfigure}
+\caption*{Napake so najmanjše doslej brez kakih čudnih obnašanj razen za h=0.01, kjer je osciliranje napake verjetno že posledica končne natančnosti računalnika.}
+\end{figure}
+\newpage
+\subsection{k=0.01}
+Vajo bom sedaj ponovil(malo hitreje) za k, ki je za velikosten red manjši. Pa poglejmo. V tem razdelku in naprej bom osnovno Eulerjevo metodo poimenoval
+kar Eulerjeva metoda, za drugo nestabilno verzijo ter za izboljšanjo verzijo pa bom rekel, da so to kar "druga" in "tretja" Eulerjeva metoda.
+
+\begin{figure}[H]
+\includegraphics[width=\linewidth]{druge/4.pdf}
+\caption*{Vidimo, da je za manjši k metoda bolj natančna}
+\end{figure}
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{druge/5.pdf}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{druge/6.pdf}
+\end{subfigure}
+\end{figure}
+
+\begin{figure}[H]
+\includegraphics[width=\linewidth]{druge/7.pdf}
+\end{figure}
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{druge/8.pdf}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{druge/9.pdf}
+\end{subfigure}
+\caption*{Druga metoda spet kaže določeno nestabilnost v napakah, čeprav to tokrat ni tako opazno v sami funkciji}
+\end{figure}
+
+\begin{figure}[H]
+\includegraphics[width=\linewidth]{druge/10.pdf}
+\end{figure}
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{druge/11.pdf}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{druge/12.pdf}
+\end{subfigure}
+\end{figure}
+
+\begin{figure}[H]
+\includegraphics[width=\linewidth]{druge/1.pdf}
+\end{figure}
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{druge/2.pdf}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{druge/3.pdf}
+\end{subfigure}
+\end{figure}
+
+\newpage
+\subsection{k=1}
+
+\begin{figure}[H]
+\includegraphics[width=\linewidth]{druge/13.pdf}
+\caption*{Sedaj so veliki problemi že pri h=1}
+\end{figure}
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{druge/14.pdf}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{druge/15.pdf}
+\end{subfigure}
+\end{figure}
+
+\begin{figure}[H]
+\includegraphics[width=\linewidth]{druge/16.pdf}
+\caption*{Zopet opazimo nestabilnost metode}
+\end{figure}
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{druge/17.pdf}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{druge/18.pdf}
+\end{subfigure}
+\end{figure}
+
+\begin{figure}[H]
+\includegraphics[width=\linewidth]{druge/19.pdf}
+\end{figure}
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{druge/20.pdf}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{druge/21.pdf}
+\end{subfigure}
+\end{figure}
+
+\begin{figure}[H]
+\includegraphics[width=\linewidth]{druge/22.pdf}
+\end{figure}
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{druge/23.pdf}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{druge/24.pdf}
+\end{subfigure}
+\end{figure}
+
+\newpage
+
+\section{Primerjava}
+
+Sedaj bom za vsako izmed obdelanih metod, bolje pogledal kako se obnašajo pri različnih obravnavanih k. Za h bom izbral $0.1$ Plottal sem le absolutne napake, saj bomo vseeno videli katera metoda je najboljša in nas ne bo medlo dejstvo, da funkcija nekje doseže vrednost blizu nič.
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{1.pdf}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{2.pdf}
+\end{subfigure}
+\end{figure}
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{3.pdf}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{4.pdf}
+\end{subfigure}
+\caption*{Vidimo torej, da je metoda RK4 najboljša. Sledi ji Tretja Eulerjeva. Prve in druga Eulerja pa sta slabši. }
+\end{figure}
+
+Zanima me samo še kakšen korak bi moral vzeti za večje vrednosti k. Pogledal bom samo za metodo Runge Kutta 4, ki je očitno najboljša. Bo 0.1 še vedno v redu?
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{5.pdf}
+\end{subfigure}
+\caption*{Seveda pada za k=10 temperatura veliko hitreje. h=0.1 je zdaj manj kot desetina intervala na katerem že dosežemo ravnovesje. Zato je že veliko manj natančno. }
+\end{figure}
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{6.pdf}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{7.pdf}
+\end{subfigure}
+\caption*{Vidimo pa, da ko za korak tukaj vzamemo nekaj manj kot stotinko intervala je napaka že pod $~10^{-5}$ kar je kar zadovoljivo}
+\end{figure}
+
+Poglejmo si še hitreje padajoči primer in sicer k=100.
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{8.pdf}
+\end{subfigure}
+\caption*{Zdaj pa že 0.01 ni dovolj in moramo iti se malo manjše. Pri 0.005 je majhna a če dobro pogledamo še vedno vidna napaka}
+\end{figure} 
+
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{9.pdf}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{10.pdf}
+\end{subfigure}
+\end{figure}
+
+Za konec si poglejmo še malo vizualno kako izgledajo rešitve za več različnih k. Seveda že vemo, da je to eksponento pojemanje.
+\begin{figure}[H]
+\includegraphics[width=\linewidth]{vec.pdf}
+\end{figure}
+\newpage
+\section{Dodatna naloga}
+
+Poglejmo si zdaj še to enačbo:
+\begin{equation*}
+\frac{dT}{dt} = -k(T-T_{zun}) + Asin\Big(\frac{2\pi}{24}(t-\delta)\Big)
+\end{equation*}
+
+Pri kateri so fiksni parametri $k=0.1$ in $\delta = 10$. Za začetno temperaturo bom spet vzel $T(0) = 21$
+Uporabil bom metodo Runge-Kutta 4. Poglejmo, ali bodo isti h-ji, katere sem uspešno uporabil za $A=0$ 
+primerni tudi sedaj.
+
+Enačba je še vedno analitično rešljiva, a bom raje določil ali je h dovolj majhen na ta način: Vemo, da mora aproksimacija za manjše korake vedno bolj konvergirati k pravi rešitvi. Ko se bo torej zgodilo, da je funkcija za dva dokaj različna(za kakšen velikostni red) funkcija skoraj ista(V smislu da ni opazne razlike), bo to potem že kar pravi izgled funkcije.
+
+Poglejmo si najprej A=1:
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{dod/1.pdf}
+\end{subfigure}
+\caption*{Če pogledam nazaj primer za A=0 takoj vidimo, da je tam celo h=5 deloval dokaj dobro. Tukaj to ni več res, izgleda pa, da h=0.1 in manj še vedno v redu deluje.}
+\end{figure}
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{dod/2.pdf}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{dod/3.pdf}
+\end{subfigure}
+\caption*{Vidimo, da je podobno tudi za drugačne vrednosti $T_{zun}$}
+\end{figure}
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{dod/4.pdf}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{dod/5.pdf}
+\end{subfigure}
+\caption*{Dobro je bilo narediti še kakšen primer ko je zunanja temperatura višja oziroma približno ista kot začetna}
+\end{figure}
+
+Kako torej izgledajo rešitve pri več možnosti kombinacij A in zunanje temperature? Pri vseh sledečih grafih sem za korak vzel kar 0.001, da bo res izgledalo kot je.
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{dod/6.pdf}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{dod/7.pdf}
+\end{subfigure}
+\caption*{Seveda $T_{zun}$ določa približno lego končnega stanja okoli katerega potem funkcija oscilira}
+\end{figure}
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{dod/8.pdf}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{dod/9.pdf}
+\end{subfigure}
+\caption*{Za A=0.1 so oscilacije manj vidne in postaja bolj podobno našemu primeru za A=0.}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{\textwidth}
+\includegraphics[width=\linewidth]{dod/10.pdf}
+\end{subfigure}
+\caption*{Tukaj sem samo še na hitro preveril ali h=0.1 in h=0.01 še vedno delujeta pri toliko večjem A}
+\end{figure}
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{dod/11.pdf}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{dod/12.pdf}
+\end{subfigure}
+\caption*{Kot smo prej videli A samo spremeni amplitudo oscilacij. Za majhen A in $T_{zun}=T(0)$ je graf skorajda konstanta funkcija}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{\textwidth}
+\includegraphics[width=\linewidth]{dod/13.pdf}
+\end{subfigure}
+\end{figure}
+\newpage
+Zanima nas še, kako bi lahko določili maksimume temperature in kdaj nastopijo?
+
+Poskusimo recimo za ta primer:
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{\textwidth}
+\includegraphics[width=\linewidth]{dod/max.pdf}
+\end{subfigure}
+\end{figure}
+
+Ekstrem nastopi ko je odvod 0, Če se vrnemo k naši enačbi vidimo kako se izraža odvod:
+\begin{equation*}
+\frac{dT}{dt} = -0.1(T(t) - T_{zun}) + Asin\Big(\frac{2\pi}{24}(t-\delta)\Big)
+\end{equation*}
+
+Vse te količine pa poznamo, saj smo T(t) zgoraj ves čas računali.
+
+Odvod izgleda potem nekako takole:
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{\textwidth}
+\includegraphics[width=\linewidth]{dod/max2.pdf}
+\end{subfigure}
+\end{figure}
+
+Problem je ker nam ničle te funkcije dajo maksimume in minimume, mi pa želimo le maksimume. Približno kje bi bil maksimum lahko uganemo že če pogledamo na graf. Vprašanje bi morda zdaj bilo, ali je možno, da bi s kako čudno kombinacijo parametrov prišli do tega, da bi težje videli kje približno leži maksimum. Odgovor je ne, saj smo videli, da nam naša parametra A in $T_{zun}$ le določato kako veliko so amplitude oziroma premik v y osi.
+
+Torej ko imamo odvod in vemo približno kje iskati lahko uporabimo bisekcijo. Problem, na katerega zdaj naletimo je, da imamo mi le diskretne vrednosti naše funkcije, za bisekcijo pa bi si ponavadi želeli zveznost. To lahko rešimo tako, da npr. namesto, da pogledamo vrednost funkcije v točno določenem x, pogledamo vrednost funkcije v neki diskretni točki katero imamo, ki je najbližje temu x. Če si naš korak h zmanjšamo, bomo dobili več točk in bomo tako lahko bolj natančni(Če želimo).
+
+Rezultat:
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{\textwidth}
+\includegraphics[width=\linewidth]{dod/max3.pdf}
+\end{subfigure}
+\end{figure} 
+
+Še zadnji problem bi bil, če bi si želeli veliko maksimumov. Seveda ne bomo hoteli za vsako iti gledat na graf kje približno se nahaja. 
+Ena izmed možnosti bi bila, da vidimo, da so razlike v x koordinatah maksimumov dokaj konstante okoli 24. Nekaj časa bi verjetno delovalo če bi prejšnjem maksimumu samo prišteli to številko in to vzeli za približek za nov maksimum.
+
+Še ena možnost pa bi bila, da bi preprosto sprehajali po celi osi x in z bisekcijo iskali ničle odvode na več intervalih npr([0,10],[10,20],[20,30] itd) Na nekaterih intervalih morda ne bi bilo ničle morda bi bil maksimum ali pa minimum. To bi lahko preverili preprosto tako, da bi pogledali vrednost v neki točki in vrednosti malce levo in desno od te točke in tako videli ali smo na "hribu" ali v "dolini".
+
+\end{document}

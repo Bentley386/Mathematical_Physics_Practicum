@@ -1,0 +1,880 @@
+\documentclass{article}
+
+\title{Mafija praktikum: Airyjevi funkciji}
+\author{Andrej Kolar-Po{\v z}un}
+
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage{float}
+
+\begin{document}
+\pagenumbering{gobble}
+\maketitle
+\newpage
+\pagenumbering{arabic}
+
+\section{Uvod}
+V temle dokumentu se bom lotil reševanja prve naloge matematično-fizikalnega praktikuma. Navodila za nalogo in potrebni podatki so v isti mapi pod imenom
+"mafijaprakt1.pdf".
+Naloge se bom lotil s Pythonom 3.5 (SciPy knjižnice).
+
+\section{Računanje potrebnih vrst}
+
+Vidimo, da lahko funkciji Ai(x) ter Bi(x) izračunamo preko raznih podanih vrst. Dobro bi bilo torej začeti s tem, da
+ustvarimo funkcije, ki bodo lahko seštele poljubno(končno) število členov te vrste.
+
+Poglejmo si najprej tole vrsto:
+\begin{equation*}
+f(x) = \sum_{k=0}^{\infty} \left(\frac{1}{3}\right)_k \frac{3^k x^{3k}}{(3k)!}
+\end{equation*}
+
+Vemo, da bo za natančen rezultat treba sešteti zelo veliko členov te vrste. V vrsti nastopa veliko hitro rastočih funkcij: potenčna, 
+fakulteta in gama funkciji v definiciji Pochammerjevega simbola. 
+Takim ogromnim številkam se raje izogibamo in poskusimo vrsto izračunati na pametnejši način. Zapišimo nekaj prvih členov vrste:
+
+
+\begin{align*}
+a_0 &= 1 \\
+a_1 &= a_0 * \frac{3x^3}{3*2*1}*\frac{1}{3} \\
+a_2 & = a_1 * \frac{3x^3}{6*5*4}*\frac{4}{3}
+\end{align*}
+
+Kjer smo uporabili identiteto $\Gamma(z+1) = z*\Gamma(z)$.
+Sedaj lahko z malo premisleka uganemo rekurzivno formulo za poljuben člen $a_k$, kjer k ni nič.
+
+\begin{equation*}
+a_k = a_{k-1} * \frac{3x^3}{3k*(3k-1)*(3k-2)}*(k-\frac{2}{3})
+\end{equation*}
+
+Na isti način dobimo tudi rekurzivne zveze za člene ostalih vrst, ki jih moramo izračunati.
+
+\subsection{Vrsta g(x)}
+\begin{align*}
+a_0 &= x \\
+a_k &= a_{k-1} * \frac{3x^3}{(3k-1)3k(3k+1)}*(k-\frac{1}{3})
+\end{align*}
+
+\subsection{Vrsta L(z)}
+\begin{align*}
+a_0 &= 1 \\
+a_k &= a_{k-1} * \frac{(3s-\frac{5}{2})(3s-\frac{3}{2})(3s-\frac{1}{2})}{54zs(s-\frac{1}{2})}
+\end{align*}
+
+\subsection{Vrsta P(z)}
+\begin{align*}
+a_0 &= 1 \\
+a_k &= -a_{k-1} *  \frac{(6s-\frac{11}{2})(6s-\frac{9}{2})(6s-\frac{7}{2})....(6s-\frac{1}{2})}{54^2z^22s(2s-1)(2s-\frac{3}{2})(2s-\frac{1}{2})}
+\end{align*}
+
+\subsection{Vrsta Q(z)}
+\begin{align*}
+a_0 &= \frac{5}{72z}\\
+a_k &= -a_{k-1}* \frac{(6s-\frac{5}{2})(6s-\frac{3}{2}).....(6s+\frac{5}{2})}{54^2z^22s(2s+1)(2s-\frac{1}{2})(2s+\frac{1}{2})}
+\end{align*}
+
+
+
+Največje vprašanje je, koliko členov vrste moramo sešteti, da dobimo zadovoljiv približek. 
+Za začetek sem naredil funkcije, ki vrste seštevajo dokler členi niso manjši od določene številke/dokler seštetih členov ni več od določene številke. To bom poskusil ugotoviti z malo probavanja.
+
+\newpage
+
+\section{Aproksimacije za funkcijo Ai}
+
+\subsection{Vrsta za majhne x}
+
+Izbral sem si(kar tako, da vidim kaj se zgodi), da bom nehal seštevati, ko členi postanejo manjši od $10^{-12}$ in to uporabil, da bi dobil vrednost Ai(x) v točki x=5. Sesteti sem moral le okoli 20 clenov iz vsake vrste, da bi se priblizal pravemu rezultatu na $10^-13$ natančno.
+
+Sedaj hočem bolj podbrobno raziskati do kje približno tale vrsta dobro in hitro deluje in kdaj naj končam seštevat.
+
+Preizkušal sem malo različne možnosti in primerjal z pravim rezultatom:
+\newpage
+
+\begin{figure}[H]
+
+\includegraphics{airy/majhenfiksenn.png}
+\caption*{Tukaj sem vedno šeštel določeno število členov n}
+\end{figure}
+\begin{figure}[H]
+\includegraphics{airy/majhenfiksennblizje.png}
+\caption*{Povečan del grafa, kjer se začne močno odstopanje}
+\end{figure}
+\newpage
+\begin{figure}[H]
+\includegraphics{airy/majhennfiksene.png}
+\caption*{Tukaj sem šešteval dokler ni naslednji člen manjši od določene vrednosti}
+\end{figure}
+\begin{figure}[H]
+\includegraphics{airy/majhenrazlika.png}
+\caption*{Odstopanje od prave vrednosti v odvisnosti od x}
+\end{figure}
+\newpage
+
+Vidimo torej, da ni neke opazne razlike, če računamo določeno število členov, ali se ustavimo ko so ti členi dovolj majhni.
+Izgleda, da bom dobil spodobno majhno odstopanje če vrsto za majhne x uporabim le za približno $|x| < 5$
+Člene pa bom nehal šeštevati, ko bo velikost člena padla pod $10^{-12}$, saj sem opazil, da do tega hitro pride($n << 1000$) in je torej tudi hitrejše.
+
+\subsection{Vrsta za velike x}
+ 
+Najprej sem optimistično poskusil vrsto nehati seštevati po istem kriteriju kot za male x. Hitro se je opazilo, da bo tukaj drugace, saj členi sploh niso nikoli padli pod $10^{-12}$. Poskusil sem zmanjšati pogoj na $10^{-10}$ a ni pomagalo. Sedaj sem se nehal ozirati na velikost členov in seštel kar fiksno število členov, da sploh lahko kaj narišem in vidim, če je vsaj nekje približno prav.
+Seštevanje fiksnega števila je še slabše, vrže zelo velike vrednosti in pogosto NaN(not a number).
+Še enkrat sem poskusil z končanjem seštevanja ko členi padejo pod določeno vrednost. Tokrat sem bil bolj blag in določil mejo na $10^{-7}$:
+
+\begin{figure}[H]
+\includegraphics{airy/velikxsto.png}
+\caption*{Aproksimacija z modro barvo, prava vrednost z rdečo}
+\end{figure}
+
+Izgleda torej, da se kar dobro prilega, takoj bom pogledal še koliko točno in preveril obnašanje še na višjih številkah. Opazil sem, da pri asimptostki vrsti sploh ni toliko vprašanje pri katerih parametrih se bolje prilega, ampak pri katerih parametrih sploh kaj vrže ven. Če neham šeštevati pri še manjši vrednosti se hitro zgodi, da šeštejem že milijon členov ali več. Opazil sem tudi, da pri majhih argumentih(pod približno $|x|<4$) začne zadeva močno divergirati. Členi pridejo do "inf", končen rezultat pa je "NaN" torej je ta vrsta za tako majhne argumente neuporabna.
+Pri šeštevanju fiksnih členov za večje argumente tudi hitro pridemo do "NaN". To ni tako presenetljivo, saj vemo, da so asimptotične vrste pogosto divergentne. Verjetno smo pri šeštevanju že prešli pravo vrednost in so členi začeli divjo naraščati.
+
+Prejšnjo metodo, ki je izgledala obetavna sem sedaj preizkusil še na širšem območju. Rezultat:
+
+\begin{figure}[H]
+\includegraphics{airy/velikxtisoc.png}
+\caption*{Aproksimacija z modro barvo, prava vrednost z rdečo}
+\end{figure}
+
+Lepo se vidi, da je pri približno $x=100$ nekaj narobe. Morda zato, ker so tam vrednosti Airyjeve funkcije veliko manjše od mojega pogoja za končanje seštevanja vrste.
+
+Poskusil bom to rešiti na čisto drugačen način. Asimptosko vrsto bom šešteval dokler je trenutni člen po absolutni vrednosti manjši od prejšnjega. Da vidimo ali bo to delovalo..
+
+\begin{figure}[H]
+\includegraphics{airy/problem.png}
+\caption*{Aproksimacija z modro barvo, prava vrednost z rdečo}
+\end{figure}
+
+Stvar torej težave ni rešila. Vseeno bom ostal pri tej metodi, saj se je zdela hitra in bolj smiselno se zdi, da šeštevanje členov ustavimo, ko začnejo naraščati.
+Sedaj menim, da te težave mogoče sploh ni treba popraviti. Vrednosti funkcije v tistem območju so izjemno majhne reda $10^{-300}$. Sicer je napaka kar velika, vendar dvomim, da bi takšne točne vrednosti sploh kdaj rabili. V praksi se verjetno temu reče kar 0.
+
+Se je pa zgodilo nekaj zanimivega. Zdaj ko šeštevanje končam po novem načinu, ne prihaja več do NaN napak. Seveda pa je za majhne x rešitev vseeno zelo narobe:
+
+\begin{figure}[H]
+\includegraphics{airy/divergenca.png}
+\caption*{Aproksimacija z modro barvo, prava vrednost z rdečo}
+\end{figure}
+
+
+Pa poglejmo zdaj za koliko se aproksimacija razlikuje od prave rešitve:
+
+\begin{figure}[H]
+\includegraphics{airy/velikixrazlika.png}
+\caption*{Razlika med aproksimacijo in pravo vrednostjo}
+\end{figure}
+
+Zanimvo. Pri srednje manjših argumentih torej razlika dokaj divje skače. Vseeno ostaja manjša od nekje $10^{-20}$ kar se mi zdi zadovoljiva aproksimacija. Že pri $x=5$ pa je razlika že okoli reda $10^{-12}$, torej ta asimptotska vrsta dokaj dobro deluje že za manjše argumente.
+Mimogrede, res, da je pri večjih argumentih vrednost funkcije zelo majhna, a kolikor sem opazil je vrednost napake pri teh istih vrednostih vseeno kakih 10 velikostnih redov manjša.
+Poglejmo si kako se razlika obnaša za negativne argumente:
+
+\begin{figure}[H]
+\includegraphics{airy/velikixrazlikaminus.png}
+\caption*{Razlika med aproksimacijo in pravo vrednostjo}
+\end{figure}
+
+Tukaj torej na še večjem območju razlika divja. Sicer pa je tudi funkcija sama v tem območju nemonotona. Se pa zdaj pojavi problem, ker ima funkcija tudi ničle, saj je napaka povsod neničelna torej ne veliko manjša od vrednosti funkcije kot prej. Nimam kakšnih idej za izboljšanje tega, zdi se mi pa, da pri ničlah z metodami aproksimacije tako ali tako sploh ne moremo priti do tega, da bi "absolutne vrednost napake bila nekaj redov manjša od absolutne vrednosti funkcije", napaka pa ostane enako majhna tudi, ko se oddaljimo od ničle, torej se bom s tem kar zadovoljiv.
+
+\subsection{Funkcija Ai(x) za poljuben x}
+
+Zdaj imam torej metodi, ki delujeta za velike in male ikse. Poskusil ju bom združiti, s tem, da bo moj mejnik katero naj uporabim $|x|=7$, saj izgleda  da je tam nekje mejnik kdaj postane ena metoda bolj natančna od druge.
+
+\begin{figure}[H]
+\includegraphics{airy/koncen.png}
+\caption*{Aproksimacija z modro barvo, prava vrednost z rdečo}
+\end{figure}
+
+Za negativne ikse zadeva tako hitro oscilira, da se težko vidi ali se aproksimacija res pokriva z pravo vrednostjo ali ne. Tukaj je torej del negativne osi malce pobližje:
+
+\begin{figure}[H]
+\includegraphics{airy/koncenneg.png}
+\caption*{Aproksimacija z modro barvo, prava vrednost z rdečo}
+\end{figure}
+
+Kaj pa odstopanje na celi osi?
+
+\begin{figure}[H]
+\includegraphics{airy/napakacela.png}
+\caption*{Razlika med aproksimacijo in pravo vrednostjo}
+\end{figure}
+
+\section{Funkcija Bi(x)}
+
+Ker se vse aproksimacije funkcije Bi(x) izražajo z istimi vrstami kot so se Ai(x) sem imel idejo, da bodo mogoče isti pogoji za nehanje šeštevanja vrst delovali
+tudi tukaj. In sem poskusil:
+
+\begin{figure}[H]
+\includegraphics{bairy/veliko.png}
+\caption*{Aproksimacija z modro barvo, prava vrednost z rdečo}
+\end{figure}
+
+\begin{figure}[H]
+\includegraphics{bairy/minus.png}
+\caption*{Aproksimacija z modro barvo, prava vrednost z rdečo}
+\end{figure}
+
+\begin{figure}[H]
+\includegraphics{bairy/plus.png}
+\caption*{Aproksimacija z modro barvo, prava vrednost z rdečo}
+\end{figure}
+
+Zgledalo je torej zelo obetavno, a potem sem pogledal kolikšna je napaka aproksimacije:
+
+\begin{figure}[H]
+\includegraphics{bairy/napaka.png}
+\caption*{Aproksimacija z modro barvo, prava vrednost z rdečo}
+\end{figure}
+
+Absolutna napaka torej grozljivo naraste. Na hitro sem poskusil povecati stevilo sestetih clenov, a napaka je ostajala. Potem sem opazil, da
+nad približno x=200, zadevo že tako divergira, da v bistvu daja rezultate NaN oz. inf, vseeno so bile razlike ogromne tudi na območju 100-150 kjer
+je naprimer funkcija že veliko narastla a ni še "inf/NaN".
+Še malo sem gledal vrednosti in končno ugotovil, kje je "težava". Res je da so napake ogromne, vendar je tudi vrednost funkcije na tem območju ogromna. Pravzaprav je vrednost funkcije vseeno kakih 10 velikostnih redov večja od napake, torej to pravzaprav sploh ni tako velika napaka.
+
+\section{Končen pogled}
+
+Narišimo zdaj za konec še obe moji Airyjevi funkciji na isti graf pa še relativno napako:
+
+\begin{figure}[H]
+\includegraphics{oboje.png}
+\end{figure}
+
+\begin{figure}[H]
+\includegraphics{oboje2.png}
+\end{figure}
+
+\begin{figure}[H]
+\includegraphics{oboje3.png}
+\end{figure}
+
+\begin{figure}[H]
+\includegraphics{napaki.png}
+\caption*{Relativna napaka}
+\end{figure}
+
+Napaka aproksimacije Bi(x) je torej zelo zadovoljiva, aproksimacije Ai(x) pa sicer malce manj na tistem območju kjer je nekje meja med aproksimacijo za male in velike argumente.
+\newpage
+\section{Dodatna naloga}
+
+Sedaj nas zanima prvih 100 ničel Airyjevih funkcij. Prva metoda, ki mi pade na pamet je Newtnova metoda(Ker vgrajena Ai(x) funkcija v Pythonu vrača tudi odvode). Problem je pri izbiri začetnega približka ničle. Najprej si bom malo pobližje ogledal graf Airyjevih funkcij, da vidim koliko narazen so sploh ničle(Čeprav ni nujno, da je ta interval konstanten za vse ničle).
+
+Videl sem, da so prve ničle razmaknjene za ~1-2, pozneje se malo škrči in so razmaknjene za ~0.5, mislim, da bom kar poskusil z Newtnovo metodo iskati ničle s tem da bom začel pri prvi ničli(ki jo bom dobil s začetnim približkom 0) in potem šel negativno recimo po intervalih 0.1 Da vidimo kaj se bo zgodilo..
+
+Poskusil sem torej z Newtnovo metodo, ki pa je zelo pocasi konvergirala(metalo je ven tak error) oziroma je nekako konvergirala proti necemu pozitivnemu(kar ni res saj vemo, da so ničle le na negativni realni osi).
+
+Zdaj sem to(na zelo  slab nacin) popravil. Iskal sem po isti newtnovi metodi, le da sem sproti metal stran ničle ki so večje od nič(ki v resnici sploh niso ničle le močno približevanje ničli pri prvi Airyjevi funkciji) in sproti gledal po celem do sedaj polnem seznamu obstojecih nicel, da ne dobim ponesreci še ene ničle, ki je od prejšnje le 0.001 stran(kar bi v bistvu bila samo ena ničla). Rezultati so sledeči:
+\newpage
+\subsection{Ničle Ai(x)}
+formula:-2.337163322273885, Newton-2.336141997554901
+
+formula:-4.087948607972578, Newton-4.090582746735273
+
+formula:-5.520559812349988, Newton-5.51331712331758
+
+formula:-6.786708089109229, Newton-6.786800985401768
+
+formula:-7.944133587009499, Newton-7.9469220453911005
+
+formula:-9.022650853321732, Newton-9.018933435863268
+
+formula:-10.0401743415537, Newton-10.03328479509225
+
+formula:-11.008524303732038, Newton-11.008377877088847
+
+formula:-11.93601556323586, Newton-11.936273600081728
+
+formula:-12.828776752865613, Newton-12.828772795156679
+
+formula:-13.691489035210658, Newton-13.68982077844435
+
+formula:-14.527829951775306, Newton-14.534897225683839
+
+formula:-15.340755135977986, Newton-15.340688637892825
+
+formula:-16.13268515694576, Newton-16.12621919878334
+
+formula:-16.905633997429938, Newton-16.900342202961234
+
+formula:-17.661300105697052, Newton-17.66168024256383
+
+formula:-18.401132599207113, Newton-18.402288059813305
+
+formula:-19.126380474246947, Newton-19.124309619395888
+
+formula:-19.8381298917215, Newton-19.83071160172986
+
+formula:-20.537332907677563, Newton-20.534546527850225
+
+formula:-21.224829943642096, Newton-21.22705561201599
+
+formula:-21.901367595585125, Newton-21.908856499433707
+
+formula:-22.567612917496497, Newton-22.56760700344918
+
+formula:-23.224165001121676, Newton-23.218746701854528
+
+formula:-23.871564455535914, Newton-23.871392441350583
+
+formula:-24.51030123658968, Newton-24.507369057398147
+
+formula:-25.14082116614896, Newton-25.14127025758591
+
+formula:-25.76353140098275, Newton-25.75955415254264
+
+formula:-26.378805052137228, Newton-26.378328811115445
+
+formula:-26.986985111606362, Newton-26.986940238564124
+
+formula:-27.588387809882438, Newton-27.591757221650262
+
+formula:-28.183305502632635, Newton-28.183300120565658
+
+formula:-28.77200916523743, Newton-28.772475317672534
+
+formula:-29.354750558766284, Newton-29.351788640015258
+
+formula:-29.93176411908655, Newton-29.933821844011714
+
+formula:-30.503268611418495, Newton-30.4968739163465
+
+formula:-31.06946858518375, Newton-31.068937692269795
+
+formula:-31.630555658012657, Newton-31.633527702044873
+
+formula:-32.18670965295205, Newton-32.18866177225079
+
+formula:-32.73809960900026, Newton-32.7380527437487
+
+formula:-33.28488468190139, Newton-33.28522331227882
+
+formula:-33.82721494950864, Newton-33.82695726684468
+
+formula:-34.36523213386365, Newton-34.364603847719586
+
+formula:-34.899070250345304, Newton-34.899373652053406
+
+formula:-35.42885619274788, Newton-35.428636506500006
+
+formula:-35.954710261898626, Newton-35.953332699248485
+
+formula:-36.476746644374806, Newton-36.47686217351186
+
+formula:-36.995073846994494, Newton-36.9950916868033
+
+formula:-37.50979509200501, Newton-37.51143450378521
+
+formula:-38.02100867725524, Newton-38.01974168184952
+
+formula:-38.52880830509423, Newton-38.52876855954928
+
+formula:-39.03328338327251, Newton-39.03321723892222
+
+formula:-39.53451930072302, Newton-39.530271974818724
+
+formula:-40.03259768075417, Newton-40.03265816598592
+
+formula:-40.527596613889706, Newton-40.528105061782995
+
+formula:-41.01959087233248, Newton-41.01865444304092
+
+formula:-41.50865210780525, Newton-41.50864542427973
+
+formula:-41.99484903432642, Newton-41.99515156726319
+
+formula:-42.47824759730838, Newton-42.47204007750903
+
+formula:-42.95891113021655, Newton-42.95812445534179
+
+formula:-43.43690049989686, Newton-43.43674425749356
+
+formula:-43.91227424156369, Newton-43.91176054168081
+
+formula:-44.38508868433938, Newton-44.385147718498615
+
+formula:-44.855398068145824, Newton-44.85662541940641
+
+formula:-45.32325465267042, Newton-45.323208175649995
+
+formula:-45.7887088190573, Newton-45.787584044329265
+
+formula:-46.25180916491253, Newton-46.25181628582517
+
+formula:-46.712602593156504, Newton-46.711876985175785
+
+formula:-47.171134395206316, Newton-47.16497142215651
+
+formula:-47.627448328927386, Newton-47.626430464531204
+
+formula:-48.081586691753245, Newton-48.0841816076667
+
+formula:-48.533590389336794, Newton-48.53339953718939
+
+formula:-48.98349900006457, Newton-48.98387720863135
+
+formula:-49.431350835736765, Newton-49.43367671978526
+
+formula:-49.8771829986894, Newton-49.87730305502384
+
+formula:-50.321031435612205, Newton-50.325927881950896
+
+formula:-50.762930988294286, Newton-50.76211512557342
+
+formula:-51.20291544151055, Newton-51.20290157226746
+
+formula:-51.64101756824489, Newton-51.6404646361387
+
+formula:-52.07726917242964, Newton-52.07748127667501
+
+formula:-52.51170112936764, Newton-52.51167718473279
+
+formula:-52.944343423989295, Newton-52.944302302445685
+
+formula:-53.37522518708567, Newton-53.37476947951387
+
+formula:-53.804374729647854, Newton-53.80442030323592
+
+formula:-54.23181957543306, Newton-54.233359293810786
+
+formula:-54.6575864918687, Newton-54.653590300965604
+
+formula:-55.08170151939747, Newton-55.087360086668184
+
+formula:-55.50418999935961, Newton-55.5043153050389
+
+formula:-55.92507660050054, Newton-55.92337070110866
+
+formula:-56.34438534418669, Newton-56.34315297622848
+
+formula:-56.76213962840595, Newton-56.762006095065956
+
+formula:-57.17836225062417, Newton-57.182732356547355
+
+formula:-57.59307542956406, Newton-57.59837493900652
+
+formula:-58.0063008259683, Newton-58.00628189567436
+
+formula:-58.418059562404494, Newton-58.41838599281544
+
+formula:-58.82837224216611, Newton-59.23894915189822
+
+formula:-59.23725896731926, Newton-59.65003046677569
+
+formula:-59.644739355942576, Newton-61.26094070101069
+
+formula:-60.05083255860417, Newton-62.061111211465146
+
+formula:-60.45555727411667, Newton-95.72251838797646
+
+\subsection{Ničle Bi(x)}
+formula:3.155519766331502, Newton-1.17371
+
+formula:-3.2710787090748767, Newton-3.2712713561503115
+
+formula:-4.830737748256738, Newton-4.831450021813814
+
+formula:-6.169852124795421, Newton-6.169843786538271
+
+formula:-7.376762079059813, Newton-7.376616165235318
+
+formula:-8.491948846464942, Newton-8.49561668382789
+
+formula:-9.538194379337316, Newton-9.545572198204308
+
+formula:-10.529913506703094, Newton-10.529381998952783
+
+formula:-11.476953551278095, Newton-11.478095059488933
+
+formula:-12.3864171385825, Newton-12.384585929379117
+
+formula:-13.263639522941714, Newton-13.263880804209784
+
+formula:-14.11275680906862, Newton-14.112905890694384
+
+formula:-14.937057412154147, Newton-14.937887400322495
+
+formula:-15.739210351190474, Newton-15.734273300470338
+
+formula:-16.52141955063437, Newton-16.521446412145387
+
+formula:-17.28553162458124, Newton-17.285535660594405
+
+formula:-18.033113287224996, Newton-18.02451712105774
+
+formula:-18.765508284480074, Newton-18.764086737243684
+
+formula:-19.48388013298923, Newton-19.478621616246272
+
+formula:-20.1892447853962, Newton-20.186528384177446
+
+formula:-20.88249599419317, Newton-20.875173269557386
+
+formula:-21.56442528471297, Newton-21.561597666960026
+
+formula:-22.23573788180338, Newton-22.23587773597104
+
+formula:-22.897065554219793, Newton-22.905005896423408
+
+formula:-23.548977079642437, Newton-23.547298619748908
+
+formula:-24.191986850648995, Newton-24.19555893485858
+
+formula:-24.826562012152888, Newton-24.826566266161016
+
+formula:-25.453128427085126, Newton-25.449708505670852
+
+formula:-26.07207569846679, Newton-26.072058818653325
+
+formula:-26.683761425120984, Newton-26.684576308194718
+
+formula:-27.2885148300763, Newton-27.294391906970688
+
+formula:-27.886639871735955, Newton-27.886686622801964
+
+formula:-28.47841792567866, Newton-28.478428133964595
+
+formula:-29.064110107777644, Newton-29.064162296231512
+
+formula:-29.643959295918396, Newton-29.644407721917197
+
+formula:-30.218191897047273, Newton-30.217509425015898
+
+formula:-30.78701939792176, Newton-30.78703050127969
+
+formula:-31.35063973125558, Newton-31.3491594435392
+
+formula:-31.909238483584566, Newton-31.908795587667797
+
+formula:-32.46298996683685, Newton-32.468096595325264
+
+formula:-33.01205817205683, Newton-33.01100565053907
+
+formula:-33.55659762084005, Newton-33.55444518855837
+
+formula:-34.09675412765602, Newton-34.09653776699074
+
+formula:-34.63266548426774, Newton-34.63150882272717
+
+formula:-35.16446207582101, Newton-35.16445239627691
+
+formula:-35.6922674368108, Newton-35.69208554336992
+
+formula:-36.21619875398748, Newton-36.21559956918772
+
+formula:-36.7363673223012, Newton-36.73637557541924
+
+formula:-37.25287895916828, Newton-37.25286523983991
+
+formula:-37.765834381651786, Newton-37.767156266787396
+
+formula:-38.275329550560045, Newton-38.2771735321796
+
+formula:-38.78145598496326, Newton-38.78135679952282
+
+formula:-39.28430105019801, Newton-39.27974724418718
+
+formula:-39.78394822205711, Newton-39.78671992967341
+
+formula:-40.280477329543686, Newton-40.28737484648495
+
+formula:-40.77396477829067, Newton-40.773821889662685
+
+formula:-41.26448375650675, Newton-41.266385900312386
+
+formula:-41.75210442510105, Newton-41.75107737908031
+
+formula:-42.23689409345656, Newton-42.237103464721486
+
+formula:-42.71891738216253, Newton-42.714036076114844
+
+formula:-43.19823637387693, Newton-43.197430819505755
+
+formula:-43.674910753366724, Newton-43.67482027943288
+
+formula:-44.14899793766616, Newton-44.1533014731412
+
+formula:-44.62055319719727, Newton-44.620509257877735
+
+formula:-45.089629768613115, Newton-45.08918045541097
+
+formula:-45.55627896004906, Newton-45.55626486764024
+
+formula:-46.02055024940101, Newton-46.020733795796055
+
+formula:-46.48249137619077, Newton-46.482230175206986
+
+formula:-46.942148427526014, Newton-46.94069837256733
+
+formula:-47.39956591861494, Newton-47.39965397762286
+
+formula:-47.854786868254514, Newton-47.84967431241946
+
+formula:-48.307852869672466, Newton-48.30420082245228
+
+formula:-48.75880415707066, Newton-48.75618369547595
+
+formula:-49.207679668186024, Newton-49.2030570276277
+
+formula:-49.6545171031586, Newton-49.65450039990594
+
+formula:-50.099352979971236, Newton-50.0944234263575
+
+formula:-50.54222268670363, Newton-50.548202875823904
+
+formula:-50.98316053082284, Newton-50.9832409630268
+
+formula:-51.422199785714675, Newton-51.42243472802071
+
+formula:-51.85937273464332, Newton-51.859336326103396
+
+formula:-52.29471071231238, Newton-52.29600489852289
+
+formula:-52.72824414418604, Newton-52.728514795255236
+
+formula:-53.16000258371715, Newton-53.15995867199868
+
+formula:-53.590014747617914, Newton-53.589955419564255
+
+formula:-54.01830854929814, Newton-54.01851716653977
+
+formula:-54.44491113058688, Newton-54.444903894681254
+
+formula:-54.8698488918446, Newton-54.86994827605265
+
+formula:-55.29314752056544, Newton-55.29303225577967
+
+formula:-55.714832018561395, Newton-55.71486541721097
+
+formula:-56.134926727814054, Newton-56.13493531207754
+
+formula:-56.55345535507366, Newton-56.55342910486751
+
+formula:-56.97044099527886, Newton-56.967325056215614
+
+formula:-57.38590615386648, Newton-57.384822440795034
+
+formula:-57.79987276803498, Newton-57.795026617054454
+
+formula:-58.21236222702162, Newton-58.2123702614951
+
+formula:-58.623395391448845, Newton-58.62319972623049
+
+formula:-59.032992611792075, Newton-59.03746010556881
+
+formula:-59.441173746017405, Newton-59.441167462466325
+
+formula:-59.84795817643466, Newton-59.84297210005587
+
+formula:-60.253364825808355, Newton-446.5174841712581
+
+\subsection{Komentar}
+Izgleda torej, da sem ničle z Newtnovo metodo zadel, le na koncu se zgodi nekaj čudnega. Verjetno so moji parametri pri Newtnovi metodi neprimerni in je zaznal, kakšno približanje ničli kot samo ničlo. Tista zadnja "ničla" -95 pa je najbrž konvergiranje k neki čudni vrednosti(Opazil sem, da pogosto nekatere začetne točke konvergirajo kar nekam drugam, npr. kakšna zelo negativna točka konvergira na pozitivno os).
+
+ Pri Bi(x) so ničle večinoma bolj uspele(Le zadnja po Newtnovi je spet izjemno čudna). Zanimiv rezultat pa je prva ničla po formuli za ničle pri Bi(x), prva je namreč pozitivna, kar vemo da ni. 
+
+za Bi(x) mi pač za nek x okoli -60 newtnova metoda očitno konvergira k neki zelo oddaljeni ničli. Tega sem se rešil tako, da sem raje poiskal prvih 101 ničel, in potem odrezal najmanjšo(v tem primeru -446). Zdaj je rezultat tole:
+
+formula:3.155519766331502, Newton-1.17371
+
+formula:-3.2710787090748767, Newton-3.2712713561503115
+
+formula:-4.830737748256738, Newton-4.831450021813814
+
+formula:-6.169852124795421, Newton-6.169843786538271
+
+formula:-7.376762079059813, Newton-7.376616165235318
+
+formula:-8.491948846464942, Newton-8.49561668382789
+
+formula:-9.538194379337316, Newton-9.545572198204308
+
+formula:-10.529913506703094, Newton-10.529381998952783
+
+formula:-11.476953551278095, Newton-11.478095059488933
+
+formula:-12.3864171385825, Newton-12.384585929379117
+
+formula:-13.263639522941714, Newton-13.263880804209784
+
+formula:-14.11275680906862, Newton-14.112905890694384
+
+formula:-14.937057412154147, Newton-14.937887400322495
+
+formula:-15.739210351190474, Newton-15.734273300470338
+
+formula:-16.52141955063437, Newton-16.521446412145387
+
+formula:-17.28553162458124, Newton-17.285535660594405
+
+formula:-18.033113287224996, Newton-18.02451712105774
+
+formula:-18.765508284480074, Newton-18.764086737243684
+
+formula:-19.48388013298923, Newton-19.478621616246272
+
+formula:-20.1892447853962, Newton-20.186528384177446
+
+formula:-20.88249599419317, Newton-20.875173269557386
+
+formula:-21.56442528471297, Newton-21.561597666960026
+
+formula:-22.23573788180338, Newton-22.23587773597104
+
+formula:-22.897065554219793, Newton-22.905005896423408
+
+formula:-23.548977079642437, Newton-23.547298619748908
+
+formula:-24.191986850648995, Newton-24.19555893485858
+
+formula:-24.826562012152888, Newton-24.826566266161016
+
+formula:-25.453128427085126, Newton-25.449708505670852
+
+formula:-26.07207569846679, Newton-26.072058818653325
+
+formula:-26.683761425120984, Newton-26.684576308194718
+
+formula:-27.2885148300763, Newton-27.294391906970688
+
+formula:-27.886639871735955, Newton-27.886686622801964
+
+formula:-28.47841792567866, Newton-28.478428133964595
+
+formula:-29.064110107777644, Newton-29.064162296231512
+
+formula:-29.643959295918396, Newton-29.644407721917197
+
+formula:-30.218191897047273, Newton-30.217509425015898
+
+formula:-30.78701939792176, Newton-30.78703050127969
+
+formula:-31.35063973125558, Newton-31.3491594435392
+
+formula:-31.909238483584566, Newton-31.908795587667797
+
+formula:-32.46298996683685, Newton-32.468096595325264
+
+formula:-33.01205817205683, Newton-33.01100565053907
+
+formula:-33.55659762084005, Newton-33.55444518855837
+
+formula:-34.09675412765602, Newton-34.09653776699074
+
+formula:-34.63266548426774, Newton-34.63150882272717
+
+formula:-35.16446207582101, Newton-35.16445239627691
+
+formula:-35.6922674368108, Newton-35.69208554336992
+
+formula:-36.21619875398748, Newton-36.21559956918772
+
+formula:-36.7363673223012, Newton-36.73637557541924
+
+formula:-37.25287895916828, Newton-37.25286523983991
+
+formula:-37.765834381651786, Newton-37.767156266787396
+
+formula:-38.275329550560045, Newton-38.2771735321796
+
+formula:-38.78145598496326, Newton-38.78135679952282
+
+formula:-39.28430105019801, Newton-39.27974724418718
+
+formula:-39.78394822205711, Newton-39.78671992967341
+
+formula:-40.280477329543686, Newton-40.28737484648495
+
+formula:-40.77396477829067, Newton-40.773821889662685
+
+formula:-41.26448375650675, Newton-41.266385900312386
+
+formula:-41.75210442510105, Newton-41.75107737908031
+
+formula:-42.23689409345656, Newton-42.237103464721486
+
+formula:-42.71891738216253, Newton-42.714036076114844
+
+formula:-43.19823637387693, Newton-43.197430819505755
+
+formula:-43.674910753366724, Newton-43.67482027943288
+
+formula:-44.14899793766616, Newton-44.1533014731412
+
+formula:-44.62055319719727, Newton-44.620509257877735
+
+formula:-45.089629768613115, Newton-45.08918045541097
+
+formula:-45.55627896004906, Newton-45.55626486764024
+
+formula:-46.02055024940101, Newton-46.020733795796055
+
+formula:-46.48249137619077, Newton-46.482230175206986
+
+formula:-46.942148427526014, Newton-46.94069837256733
+
+formula:-47.39956591861494, Newton-47.39965397762286
+
+formula:-47.854786868254514, Newton-47.84967431241946
+
+formula:-48.307852869672466, Newton-48.30420082245228
+
+formula:-48.75880415707066, Newton-48.75618369547595
+
+formula:-49.207679668186024, Newton-49.2030570276277
+
+formula:-49.6545171031586, Newton-49.65450039990594
+
+formula:-50.099352979971236, Newton-50.0944234263575
+
+formula:-50.54222268670363, Newton-50.548202875823904
+
+formula:-50.98316053082284, Newton-50.9832409630268
+
+formula:-51.422199785714675, Newton-51.42243472802071
+
+formula:-51.85937273464332, Newton-51.859336326103396
+
+formula:-52.29471071231238, Newton-52.29600489852289
+
+formula:-52.72824414418604, Newton-52.728514795255236
+
+formula:-53.16000258371715, Newton-53.15995867199868
+
+formula:-53.590014747617914, Newton-53.589955419564255
+
+formula:-54.01830854929814, Newton-54.01851716653977
+
+formula:-54.44491113058688, Newton-54.444903894681254
+
+formula:-54.8698488918446, Newton-54.86994827605265
+
+formula:-55.29314752056544, Newton-55.29303225577967
+
+formula:-55.714832018561395, Newton-55.71486541721097
+
+formula:-56.134926727814054, Newton-56.13493531207754
+
+formula:-56.55345535507366, Newton-56.55342910486751
+
+formula:-56.97044099527886, Newton-56.967325056215614
+
+formula:-57.38590615386648, Newton-57.384822440795034
+
+formula:-57.79987276803498, Newton-57.795026617054454
+
+formula:-58.21236222702162, Newton-58.2123702614951
+
+formula:-58.623395391448845, Newton-58.62319972623049
+
+formula:-59.032992611792075, Newton-59.03746010556881
+
+formula:-59.441173746017405, Newton-59.441167462466325
+
+formula:-59.84795817643466, Newton-59.84297210005587
+
+formula:-60.253364825808355, Newton-60.2534012885078
+
+
+
+Kar izgleda veliko bolj v redu.
+\end{document}
+
+

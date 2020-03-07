@@ -1,0 +1,194 @@
+\documentclass{article}
+
+\title{Mafija praktikum: Hitra Fourierova transformacija in korelacijske funkcije}
+\author{Andrej Kolar-Po{\v z}un}
+
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{subcaption}
+\usepackage{caption}
+\usepackage{float}
+\usepackage{physics}
+
+\errorcontextlines 10000
+\begin{document}
+\pagenumbering{gobble}
+\maketitle
+\newpage
+\pagenumbering{arabic}
+
+\section{Uvod}
+Pri naslednjih nalogah bom uporabljal hitro Fourierovo transformacijo(FFT), ki je v Pythonu že implementirana v scipy knjižnici. Ta funkcija ima tudi že vgrajen "zero-padding", tako da doda potrebno število ničel,
+da bodo signali, katere bom obdeloval iste dolžine, ter da bo ničel dovolj, da ne bo prišlo do odtujitve.
+Oknenja tokrat ne bom uporabil, ker bomo pri korelaciji itak naredili še inverzno transformacijo.
+Zanimala nas bo predvsem korelacijska funkcija, ki nekako pove, kako podobna sta si dva signala. Računal jo bom na ta način:
+\begin{equation*}
+C(g,h) = \mathcal{F}^{-1}[\mathcal{F}g \cdot (\mathcal{F}h)^*]
+\end{equation*} 
+Kjer $^*$ predstavlja kompleksno konjugacijo in $\mathcal{F}$ predstavlja Fourierovo transformacijo.
+Zanimala nas bo tudi avtokorelacijska funkcija oziroma korelacijska funkcija same s sabo, ki je seveda definirana kot:
+\begin{equation*}
+C(h,h) = \mathcal{F}^{-1}[|\mathcal{F}h|^2]
+\end{equation*}
+Da se bo lepše videlo, bom rajši računal reskalirano avtokorelacijsko funkcijo:
+\begin{align*}
+\widetilde{C}(h,h)_n &= \frac{C(h,h)_n-\langle h\rangle ^2}{C(h,h)_0-\langle h\rangle ^2} \\
+\langle h\rangle &= \frac{1}{N} \sum_{k=0}^{N-1} h_k
+\end{align*}
+Tudi pri korelaciji dveh signalov bom uvedel neko vrsto reskalacije:
+\begin{align*}
+\widetilde{C}(g,h) &= \frac{C(g,h)}{|f| |g|} \\
+|f|^2 &= |f_0|^2 + |f_1|^2 + ... + |f_{n-1}|^2
+\end{align*}
+
+\section{Oglašanje velike uharice}
+
+Podane imamo posnetke oglašanja dveh sov velikih uharic, in posnetke istih sov skupaj z motečim ozadjem. 
+S korelacijo bom poskusil ugotoviti za katero sovo gre v slednjih posnetkih.
+Najprej si oglejmo avtokorelacijsko funkcijo obeh sov z in brez ozadja.
+
+\subsection{Avtokorelacijske funckije}
+\newpage
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{avto/sova1.pdf}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{avto/sova12.pdf}
+\end{subfigure}
+\caption*{Seveda je največja korelacija pri x=0(Saj takrat primerjamo signal točno samim s sabo, vidi se tudi iz definicije reskalirene avtokorelacijske funkcije) in potem pada.Opazimo še manjše lokalne maksimume/minimume} 
+\end{figure}
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{avto/sova2.pdf}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{avto/sova22.pdf}
+\end{subfigure}
+\caption*{V tem primeru se očitno avtokorelacija izgublja počasneje kot prej}
+\end{figure}
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{avto/cricki.pdf}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{avto/cricki2.pdf}
+\end{subfigure}
+\end{figure}
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{avto/potok.pdf}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{avto/potok2.pdf}
+\end{subfigure}
+\end{figure}
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{avto/reka.pdf}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{avto/reka2.pdf}
+\end{subfigure}
+\end{figure}
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{avto/reka3.pdf}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{avto/rekaa.pdf}
+\end{subfigure}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=.5\linewidth]{avto/rekaa2.pdf}
+\caption*{Za uharice ob deroči reki opazimo, da se avtokorelacija izgublja zelo hitro}
+\end{figure}
+
+\subsection{Korelacijske funkcije}
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{kor/prva.pdf}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{kor/druga.pdf}
+\end{subfigure}
+\caption*{Sova ob čričkih je torej prva sova}
+\end{figure}
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{kor/tretja.pdf}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{kor/cetrta.pdf}
+\end{subfigure}
+\caption*{Sova ob potoku je tudi prva sova}
+\end{figure}
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{kor/peta.pdf}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{kor/sesta.pdf}
+\end{subfigure}
+\caption*{Prva neznana sova ob deroči reki je spet naša prva sova}
+\end{figure}
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{kor/sedma.pdf}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{kor/osma.pdf}
+\end{subfigure}
+\caption*{Druga neznana sova ob deroči reki pa je naša druga velika uharica}
+\end{figure}
+
+\section{Ostale avtokorelacijske funkcije}
+Poglejmo si še nekaj zanimivih primerov. Pokazal bom nekaj podatkov, ki sem jih našel na spletni strani in autokorelacijske funkcije le-teh.
+\footnote{\label{tukaj}http://predmeti.fmf.uni-lj.si/mafiprak/naloga5}
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{radio.pdf}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{radio2.pdf}
+\end{subfigure}
+\caption*{Vidimo, da se korelacija samo izgublja. Vrednosti grejo le od 0 do 1, ker so tudi moji vhodni podatki imeli le pozitivne vrednosti}
+\end{figure}
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{voda.pdf}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{voda2.pdf}
+\end{subfigure}
+\caption*{Podobna slika kot prej. Tudi na desni nič kaj ne izgleda, da bi bilo kaj avtokoreliranosti.}
+\end{figure}
+
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{sunspots.pdf}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{sunspots2.pdf}
+\end{subfigure}
+\caption*{Tukaj na desni vidimo, da neka periodičnost je prisotna. To se v avtokorelacijski funkiji vidi tako, da avtokoreliranost skače med približno 0 pa neko vrednostjo vidno nad 0}
+\end{figure}
+
+\end{document}
+
+

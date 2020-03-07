@@ -1,0 +1,267 @@
+\documentclass{article}
+
+\title{Mafija praktikum: Lastne vrednosti in lastni vektorji}
+\author{Andrej Kolar-Po{\v z}un}
+
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{subcaption}
+\usepackage{caption}
+\usepackage{float}
+\usepackage{physics}
+
+\errorcontextlines 10000
+\begin{document}
+\pagenumbering{gobble}
+\maketitle
+\newpage
+\pagenumbering{arabic}
+
+\section{Uvod}
+Vemo, da lahko enodimenzijski linearni harmonski oscilator opišemo z brezdimenzijsko Hamiltonovo funkcijo:
+\begin{equation*}
+H^0 = \frac{1}{2}(p^2 + q^2)
+\end{equation*}
+kjer je $q$ neka generalizirana koordinata.
+Za takšno Hamiltonovo funkcijo poznamo lastna stanja in lastne energije:
+\begin{align*}
+\ket{n} &= (2^nn!\sqrt{\pi})^{-\frac{1}{2}}e^{-\frac{q^2}{2}}\mathcal{H}_n(q) \\
+E_n &= (n+\frac{1}{2})
+\end{align*}
+Kjer $\mathcal{H}_n$ označuje n-ti Hermitov polinom.
+Zanima nas, kaj se z lastnimi stanji in energiji zgodi, če Hamiltonovo funkcijo malce spremenimo:
+\begin{equation*}
+H = H^0 + \lambda q^4
+\end{equation*}
+Kjer je $\lambda$ med 0 in 1.
+
+Za začetek, tukaj so prva štiri lastna stanja nespremenjene Hamiltonove funkcije:
+
+\begin{figure}[H]
+\includegraphics[width=\linewidth]{nemoten.pdf}
+\end{figure}
+Za energije pa vemo, da je najnižja $\frac{1}{2}$ za naslednje pa le prištejemo ena.
+\newpage
+\section{Matrični elementi novega H}
+Za izračun bomo seveda potrebovali nekaj matričnih elementov 
+
+$[H_{ij}] = [H^0_{ij}] + \lambda [q_{ij}]^4$
+
+Prvi člen v enačbi seveda že poznamo in sicer je to diagonalna matrika z vrednostmi $i+\frac{1}{2}$ na diagonali, kjer je $i$ številka vrstice/stolpca s tem, da začnemo šteti pri 0.
+Pri drugem členu imamo formulo:
+\begin{equation*}
+q_{ij} = \bra{i}q\ket{ j} = \frac{1}{2} \sqrt{i+j+1}\; \delta_{|i-j|,1}
+\end{equation*}
+Kjer $\delta$ predstavlja Kroneckerjev delta.
+\subsection{$\lambda=0.5$}
+Za začetek sem popravek računal tako, da sem najprej izračunal matrični element $q_ij$ in to matriko potem potenciral na četrto potenco.
+Poglejmo, kako se prvih pet lastnih vrednosti spreminja, ko povečujem velikost matrike:
+\begin{figure}[H]
+\includegraphics[width=\linewidth]{razlicnin.pdf}
+\caption*{Vidimo, da lastne energije izračunane pri N=10 že močno odstopajo od energij izračunane pri N=100 za 6. vzbujeno stanje, pri N=20, pa se odstopanje že začenja pri 7. vzbujenem stanju}
+\end{figure}
+Mi želimo dobiti le prvih nekaj energij(recimo do deset), zato sem preveril odstopanje le teh pri N=100 in N=1000. Odstopanja ni bilo videti, zato je najbrž N=100 najbližje pravim vrednostim lastnih energij in bi se zdelo, da je mogoče varna izbira za računanje lastnih energij in stanj.
+
+Ko se poskusimo lotiti lastnih stanj pa ugotovimo, da je N=100 pravzaprav slaba izbira. Seveda imamo opravka z ogromnimi števili, glede na to, da v lastni funkciji nastopajo recimo $2^n, n!, \mathcal{H}_n$. Pojavi se dilema, kakšen N vzeti. Najbrž bom tako ali tako narisal le kakih prvih 6 stanj, v tem primeru bi bil morda že N=20 dober(Odstopanje sicer je, vendar šele na 2. decimalki v energiji). Sedaj bom poskusil N=30, čeprav so številke tukaj že ogromne. Da vidimo, če se kaj pozna:
+(Mimogrede, pri N=30 je odstopanje od N=100 šele pri petem vzbujenem stanju in to šele na četrti decimalki)
+
+\begin{figure}[H]
+\includegraphics[width=\linewidth]{razlicnin2.pdf}
+\caption*{N=10 je očitno drugačen, za N=20 in N=30 pa je razlika majhna, a vseeno opazna}
+\end{figure}
+
+Odstopanja sem pogledal le pri višjem stanju(n=5), ker sem videl, da prihaja seveda v višjih stanjih do večjih napak. Če torej vidim, da metoda nima velike napake pri nekem stanju, bom predpostavljal, da je nima tudi pri stanjih, ki so nižja od le-tega. N=40, sej je v tem primeru lepo pokrival z N=30, torej bom rekel, da je N=30 primerno število. Tukaj bom še omenil, da se mi je včasih zgodila, da je bila valovna funkcija prezrcaljena čez abscisno os. To se zgodi, ker če je v lastni vektor, je tudi -v in očitno je funkcija za diagonalizacijo včasih vrgla te obrnjene lastne vektorje ven. To sem popravil tako, da sem preveril ali se predznaka lastne funkcije, ki jo računam in lastne funkcije oscilatorja brez popravkov(Iz Hermitovih polinomov) istega reda ujemata(Ujemanje sem preverjal pri x=0.1). Če se ne, sem vektor obrnil.
+
+Edino kar moram še preveriti, so različne metode računanja matričnih elementov popravka. Poglejmo kako je s tem:
+Matrični element popravka lahko računamo tako, da računamo matrični element $q$, $q^2$ ali $q^4$.(Potem je treba matriko ustrezno potencirati, kot sem razlagal že prej). Poglejmo kako se funkcije razlikujejo pri teh načinih.
+
+\begin{figure}[H]
+\includegraphics[width=\linewidth]{razlicninacini.pdf}
+\caption*{Razlika torej je zelo opazna. Težko pa je reči, kateri način je najboljši, saj na različnih mestih so različne krivulje najbližje vrednosti N=30}
+\end{figure}
+N = 30 sem tukaj vzel kot najbolj pravo vrednost s katero primerjam. To in razlog zakaj sem na grafu prikazal funkcijo za N=10 za katero vemo, da slabo deluje je to, da pri višjih N-jih sploh ni bilo videti razlike. Se pravi, čeprav so funkcije različne pri N=10, izgleda, da je pri višjih N-jih(Ki jih bom tako ali tako uporabljal, saj smo že videli, da so manjši N-ji slabi) ni razlike. Poglejmo, če je ista zgodba pri lastnih energijah:
+
+\begin{figure}[H]
+\includegraphics[width=\linewidth]{razlicninacini2.pdf}
+\caption*{Situacija je podobna kot prej  v smislu, da pri N=30 ni nobene razlike, pri majhnih N pa razlika je}
+\end{figure}
+Opazimo pa nekaj drugačnega. Pri energijah se lepo vidi, da se računanje matričnega elementa $q_{ij}$ najbližje prilega.(Pri n=6 se prekriva z $q^2_{ij}$ drugače pa je bližje). Torej glede na to, da se za nek način računanja moramo odločiti, se bomo odločili za računanje
+matričnega elementa $q_{ij}$ in potenciranje dobljene matrike na 4.
+
+Sedaj pride na vrsto grafična reprezentacija slik in energijskih nivojov in primerjava z nemoteno Hamiltonsko funkcijo(Na grafih označena kot $\lambda = 0$ in je izračunana po formuli omenjeni na prvi strani(s Hermitovi polinomi)
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{slike/energije.pdf}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{slike/stanja.pdf}
+\end{subfigure}
+\end{figure}
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{slike/n0.pdf}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{slike/n1.pdf}
+\end{subfigure}
+\end{figure}
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{slike/n2.pdf}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{slike/n3.pdf}
+\end{subfigure}
+\end{figure}
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{slike/n4.pdf}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{slike/n5.pdf}
+\end{subfigure}
+\end{figure}	
+
+\section{$\lambda = 0.8$}
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{slike2/energije.pdf}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{slike2/stanja.pdf}
+\end{subfigure}
+\end{figure}
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{slike2/n0.pdf}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{slike2/n1.pdf}
+\end{subfigure}
+\end{figure}
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{slike2/n2.pdf}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{slike2/n3.pdf}
+\end{subfigure}
+\end{figure}
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{slike2/n4.pdf}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{slike2/n5.pdf}
+\end{subfigure}
+\end{figure}	
+
+\section{$\lambda = 0.2$}
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{slike3/energije.pdf}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{slike3/stanja.pdf}
+\end{subfigure}
+\end{figure}
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{slike3/n0.pdf}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{slike3/n1.pdf}
+\end{subfigure}
+\end{figure}
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{slike3/n2.pdf}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{slike3/n3.pdf}
+\end{subfigure}
+\end{figure}
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{slike3/n4.pdf}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{slike3/n5.pdf}
+\end{subfigure}
+\end{figure}
+
+\section{Primerjava}
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{Primerjava.pdf}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{Primerjava2.pdf}
+\end{subfigure}
+\end{figure}
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{Primerjava3.pdf}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{Primerjava4.pdf}
+\end{subfigure}
+\end{figure}
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{Primerjava5.pdf}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{Primerjava6.pdf}
+\end{subfigure}
+\end{figure}
+\begin{figure}[H]
+\includegraphics[width=.5\linewidth]{Primerjava7.pdf}
+\end{figure}
+
+Vidimo, da se z zmanjšanjem $\lambda$ približujemo nemoteni Hamiltonovi funkciji, kot je tudi prav, saj je nemotena funkcija ravno $\lambda=0$
+\newpage
+\section{Dodatna naloga}
+
+Isto bom poskusil ponoviti še za to Hamiltonovo funkcijo:
+\begin{equation*}
+H_1 = \frac{p^2}{2} - 2q^2 + \frac{q^4}{10} = H_0 - \frac{5}{2}q^2 + \frac{q^4}{10}
+\end{equation*}
+Vidimo, da je popravek v tem primeru večji, kar pomeni, da bodo rezultati najbrž manj natančni. Poglejmo, kaj dobimo(Spet bom računal z N=30(Preveril sem spet ali je pri višjih N rezultat isti in je) in računanjem matričnega elementa $q_{ij}$)
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{bonus/energija.pdf}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{bonus/stanja.pdf}
+\caption*{Izgleda, da imamo pare lastnih funkcij, ki na določeni strani abscisne osi izgledata isto, a je ena potem soda ena pa liha}
+\end{subfigure}
+\end{figure}
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{bonus/n0.pdf}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{bonus/n1.pdf}
+\end{subfigure}
+\end{figure}
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{bonus/n2.pdf}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{bonus/n3.pdf}
+\end{subfigure}
+\end{figure}
+\begin{figure}[H]
+\includegraphics[width=.5\linewidth]{bonus/energije.pdf}
+\end{figure}
+\end{document}
+
+

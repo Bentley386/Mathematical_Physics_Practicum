@@ -1,0 +1,216 @@
+\documentclass{article}
+
+\title{Matemati{\v c}no-fizikalni praktikum: Resevanje PDE z metodo Galerkina}
+\author{Andrej Kolar-Po{\v z}un}
+
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{subcaption}
+\usepackage{caption}
+\usepackage{float}
+\usepackage{physics}
+
+\errorcontextlines 10000
+\begin{document}
+\pagenumbering{gobble}
+\maketitle
+\newpage
+\pagenumbering{arabic}
+
+\section{Uvod}
+
+Spet želimo dobiti koeficient pretoka cevi s polkrožnim presekom. Spomnimo se enačbe:
+\begin{align*}
+C =& 8\pi \int \int \frac{u(x,\phi) x dx d\phi }{(\pi/2)^2} \\
+&\nabla ^2 u(x,\phi) = 1 \\
+&u(x=1,\phi)=u(x,0) = u(x, \pi) = 0
+\end{align*}
+
+Rešitev aproksimiramo kot linearno kombinacijo nekih funkcij:
+\begin{equation*}
+u(x,\phi) = \sum_i a_i \Phi_i
+\end{equation*}
+
+Ko to vstavimo v enačbo dobimo:
+\begin{align*}
+&\sum_i A_{ij} a_i = b_j \\
+&A_{ij} = (\nabla^2 \Phi_i,\Phi_j) \\
+&b_j = (-1,\phi_j) \\
+&C = -\frac{32}{\pi} \sum_{ij} b_i A_{ij}^{-1} b_j
+\end{align*}
+
+\newpage
+\section{Reševanje}
+
+Kot naše funkcije bomo za kotni del kar obdržali kot prej $sin((2m+1)\phi)$, kjer je $m=0,1,2..$. 
+Za radialni del uganemo, da bodo dobro delovale funkcije $x^{2m+1}(1-x)^n$, $n=1,2,3...$.
+Torej:
+\begin{equation*}
+\Phi_{mn} = sin((2m+1)\phi)x^{2m+1}(1-x)^n
+\end{equation*}
+Z nekaj računanja pridemo do naslednjih rezultatov:
+\begin{align*}
+&b_{mn} = -\frac{2}{2m+1} B(2m+3,n+1) \\ 
+&A_{(m'n')(mn)} = -\delta_{nm'} \frac{\pi}{2} n n' \frac{3+4m}{2+4m+n+n'} B(n+n'-1,3+4m)
+\end{align*}
+
+Kjer B predstavlja Eulerjevo beta funkcijo.
+
+Zdaj vidimo, da je suma v enačbi za koeficient le indeksovni zapis za množenje več matrik in sicer: $c = b ^T(A^{-1} b)$,.
+Ker inverza nočemo računati to prevedemo na matrični enačbi $Ax = b$ in $c = b^T x$. Uporabljal bom scipy algoritem za "sparse" matrike.
+ 
+Na hitro si oglejmo kakšen C dobimo, in kako je ta odvisen od števila seštetih indeksov po m in n:
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{1.pdf}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{2.pdf}
+\end{subfigure}
+\caption*{Vidim, da zelo hitro pridemo do rešitve za C. Dobimo pa C=0.758}
+\end{figure}
+\newpage
+Kot prejšnjič bom primerjal še toplotna profila:
+
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{profil.pdf}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{profilkaj.pdf}
+\end{subfigure}
+\caption*{Tukaj sem po m in n seštel po 10 členov. Izgleda pravilno. Na levi je toplotni profil iz prejšnje naloge(popravljen, v prejšnji nalogi sem pozabil deliti z ničlami Bessla)}
+\end{figure}
+
+\newpage
+\section{Dodatna naloga}
+
+Sedaj rešujemo:
+\begin{equation*}
+\frac{\partial u}{\partial t} - \frac{\partial u}{\partial x} = 0
+\end{equation*}
+S periodičnimi robnimi pogoji ter x med 0 in $2\pi$.
+Začetni pogoj je $u(x,0) = sin(\pi cosx )$.
+Analičitno rešitev poznamo in je:
+\begin{equation*}
+u(x,t) = sin(\pi cos(x+t))
+\end{equation*}
+Kot poskusne funkcije vzamemo $\Phi_j(x) = e^{ijx}$
+Ko vstavimo v enačbo in skalarno pomnožimo z drugo poskusno funkcijo, dobimo sistem enačb za koeficiente:
+\begin{align*}
+&\frac{d a_k}{dt} - i k a_k = 0 \\
+& k= -N/2, ...,N/2
+\end{align*}
+Ker so naše funkcije tudi ortogonalne lahko precej preprosto dobimo začetne vrednosti koeficientov:
+\begin{equation*}
+a_k(0) =\frac{1}{2\pi}\int_0^{2\pi} u(x,0) \Phi_k(x) dx
+\end{equation*}
+
+koeficienti razvoja analitične rešitve(za primerjavo) so:
+\begin{equation*}
+a_k(t) = sin(\frac{k\pi}{2}) J_k(\pi) e^{ikt}
+\end{equation*}
+
+Najprej zračunajmo koeficiente in jih primerjajmo nekaj z analitičnimi rešitvami.
+Za začetni približek bom uporabil metodo quad iz scipy-ja, za reševanje DE pa Runge Kutta 4 z adaptivnim korakom.
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{koef/1.pdf}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{koef/2.pdf}
+\end{subfigure}
+\caption*{Izgleda, kot da se pri desnem grafu funkciji zelo razlikujeta. Če pogledamo y os pa vidimo da sta v bistvu v tem primeru obe praktično nič.}
+\end{figure}
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{koef/3.pdf}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{koef/minus1.pdf}
+\end{subfigure}
+\end{figure}
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{prva.pdf}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{druga.pdf}
+\end{subfigure}
+\caption*{Rešitvi zgledata zelo podobni(na levi sem y os malo čudno izbral)}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{analiticna.pdf}
+\end{subfigure}
+\caption*{Tudi analitična rešitev zgleda zelo podobna ostalim dvem, kako pa je zares z razliko?}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{napaka1.pdf}
+\end{subfigure}
+\end{figure}
+
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{napaka3.pdf}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{napaka2.pdf}
+\end{subfigure}
+\caption*{Na levi je rezultat z privzetim maksimalnim številom korakov, ki jih metoda Runge Kutta naredi. Na desni sem to številko povečal na 1000. Metoda nam pove, kadar je število korakov morda premajhno, torej bi za še večje čase lahko prilagajal to številko po potrebi.}
+\end{figure}
+
+\newpage
+Poizkusimo nalogo rešiti še z navadno diskretizacijo.
+Enačba postane:
+\begin{equation*}
+u_{i+1,j} = u_{i,j} + (k/h)(u_{i,j+1} - u_{i,j})
+\end{equation*}
+Kjer k pomeni velikost časovnega premika, h pa krajevnega ter kjer prvi indeks predstavlja časovni del, drugi pa krajvni.
+enačbo lahko prevedemo v matrično enačbo $u_{i+1} = A * u_{i}$, kjer je A matrika z (1-k/h) po diagonali, ter k/h nad diagonalo in še en kh v zadnji vrstici ter prvem stolpcu(zaradi periodičnosti).
+
+Rezultat:
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{nova.pdf}
+\end{subfigure}
+\caption*{S časom se torej vse skupaj slabša.. poglejmo če lahko to kako popravimo}
+\end{figure}
+
+Naslednji sliki sta pri času t=5, m šteje diskretizacijo po času, n pa po kraju
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{nova2.pdf}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{nova3.pdf}
+\end{subfigure}
+\caption*{Napake so kar velike. Nekaj ni prav.}
+\end{figure}
+
+Poizkusil sem več kombinacij m in n, pa je slika še vedno ista. Očitno je nekje neka napaka.
+
+
+
+
+
+
+
+
+
+
+\end{document}

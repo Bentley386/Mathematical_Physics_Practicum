@@ -1,0 +1,382 @@
+\documentclass{article}
+
+\title{Matemati{\v c}no-fizikalni praktikum: Newtonov zakon}
+\author{Andrej Kolar-Po{\v z}un}
+
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{subcaption}
+\usepackage{caption}
+\usepackage{float}
+\usepackage{physics}
+
+\errorcontextlines 10000
+\begin{document}
+\pagenumbering{gobble}
+\maketitle
+\newpage
+\pagenumbering{arabic}
+
+\section{Uvod}
+
+Reševal bom enačbo nihanja, ki je diferencialna enačba drugega reda:
+\begin{equation*}
+\frac{d^2x}{dt^2} = - sin(x)
+\end{equation*}
+
+Pri numeričnem reševanju diferencialne enačbe drugega reda raje zapišemo kot sistem dveh enačb prvega reda:
+\begin{align*}
+\frac{dx}{dt} &=  p \\
+\frac{dp}{dt} & = -sin(x)
+\end{align*}
+
+Enačbo bom poskusil rešiti na več načinov. Kot referenco in pravilno rešitev bom privzel reševanje s pomočjo Scipy Python knjižnice, ki
+uporablja metode Runge Kutta z prilagodljivo velikostjo koraka(Uporablja metodi RK reda 4 in 5).
+\newpage
+\section{Trapezna metoda}
+
+Preizkusimo tole trapezno shemo, ki naj bi bila točna in stabilna:
+\begin{align*}
+x(t+h) =& x(t) + h u(t+\frac{1}{2}h) \\
+u(t+\frac{1}{2}) =& u(t-\frac{1}{2}h) + h \frac{F(x(t),t)}{m}
+\end{align*}
+
+Takoj se vidi, da s to metodo dobimo vrednosti hitrosti in odmika ob različnih časih (za h/2). Za risanje grafov(in npr. faznih portretov) bom torej imel dve metodi, ki bosta delovalli zelo podobno, le da bo ena imela prvi korak(z Runge Kutta) izračunana tako, da bom dobil vrednosti hitrosti pri t=0,h,2h... druga pa, da bom dobil vrednosti odmikov pri istih časih.
+
+\subsection{v(0) = 0}
+
+Poglejmo si najprej kako je kaj s to metodo pri različnih h in kakšne so napake.
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{mat/2.pdf}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{mat/3.pdf}
+\end{subfigure}
+\caption*{Vidimo, da se že h=0.1 lepo pokriva, opazimu tudi, da se s časom napaka povečuje. }
+\end{figure}
+
+Želimo doseči natančnost na 3 decimalna mesta za prvih 10-20 nihajev.
+
+\begin{figure}[H]
+\includegraphics[width=\linewidth]{mat/4.pdf}
+\caption*{Vidimo, da pride h=0.01 po času ko opravimo pribl 20 nihajev ravno nekje do absolutne napake okoli $10^{-4}$ Torej bo ta h nekako meja pri kateri postajamo na 3. decimalko nenatančni.}  
+\end{figure}
+
+Zanimivo bi bilo videti še kako se hitrost spreminja s časom:
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{mat/5.pdf}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{mat/6.pdf}
+\end{subfigure}
+\caption*{Zelo podobno odmiku(Ni čudno, saj je metoda ista).}
+\end{figure}
+
+Za stabilnost si lahko ogledamo še fazni portret
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{mat/8.pdf}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{mat/12.pdf}
+\end{subfigure}
+\caption*{Vidimo, da se oblika ohranja(Krivulja je krožnica - glej osi) tudi po večjem številu nihajev, kar nam kaže stabilnost metode in ohranjanje energije}
+\end{figure}
+
+\begin{figure}[H]
+\includegraphics[width=\linewidth]{mat/10.pdf}
+\caption*{Primer kaj se zgodi pri prevelikem h-ju, ko je napaka že tako velika, da vidimo da se oblika faznega portreta ne ohranja.}  
+\end{figure}
+
+\subsection{v(0) = 1}
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{mat/13.pdf}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{mat/14.pdf}
+\end{subfigure}
+\caption*{Hitrost ter odmik v odvisnosti od časa.}
+\end{figure}
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{mat/15.pdf}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{mat/16.pdf}
+\end{subfigure}
+\caption*{Pri napakah je isto kot pri začetni hitrosti 0.}
+\end{figure}
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{mat/18.pdf}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{mat/17.pdf}
+\end{subfigure}
+\caption*{Oblika se še vedno ohranja. Vidimo, da je tokrat bolj elipsasta(spet glej oznake osi)}
+\end{figure}
+
+\subsection{v(0) = 3}
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{mat/19.pdf}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{mat/21.pdf}
+\end{subfigure}
+\caption*{Pri tako visoki začetni hitrosti se začnejo dogajati čudne reči.}
+\end{figure}
+
+\section{Izboljšana trapezna}
+
+Obstaja izboljšava prejšnje metode:
+\begin{align*}
+x(t+h) =& x(t) + h u\Big(t+\frac{1}{2}h\Big) \\
+u\Big(t+\frac{1}{2}h\Big) =& u\Big(t-\frac{1}{2}h\Big) + h\frac{F(x(t),t)}{m} + h\frac{F(x(t+h),t+h) - 2F(x(t),t) + F(x(t-h),t-h)}{12m}
+\end{align*}
+Shema je implicitna in bo treba nekajkrat iterirati. Iteriral sem 5 krat vsakem koraku in še vedno je delalo hitro.
+
+\subsection{v(0)=0}
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{mat/22.pdf}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{mat/23.pdf}
+\end{subfigure}
+\caption*{Vidimo, da zdaj napake ne naraščajo tako hitro s časom kot so prej. Opazimu tudi, da so napake manjše.}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{mat/24.pdf}
+\end{subfigure}
+\caption*{Nekje h=0.2-0.3 je že dovolj za napako pod $10^{-3}$.}
+\end{figure}
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{mat/25.pdf}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{mat/26.pdf}
+\end{subfigure}
+\caption*{Napake se obnašajo podobno a vidimo, da so pri hitrosti malo večje. Za želeno natančnost bi zdaj potrebovali okoli h=0.1}
+\end{figure}
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{mat/27.pdf}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{mat/28.pdf}
+\end{subfigure}
+\caption*{Fazni portret ostaja podoben(krožnica), pri h=0.3 opazimo že manjše odstopanje}
+\end{figure}
+
+\subsection{v(0)=1}
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{mat/29.pdf}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{mat/30.pdf}
+\end{subfigure}
+\caption*{Ista slika kot pri originalni trapezni metodi}
+\end{figure}
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{mat/31.pdf}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{mat/32.pdf}
+\end{subfigure}
+\caption*{Vidimo, da zdaj tudi pri tej metodi začne napaka naraščati. Potreben h pa je od okoli 0.02-0.03 kar je še vedno bolje kot prejšnja trapezna metoda, a razlika ni več tako velika, kot je bila pri v(0)=0}
+\end{figure}
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{mat/33.pdf}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{mat/34.pdf}
+\end{subfigure}
+\caption*{Pri napakah hitrosti je podobno. Pri faznem portretu pa vidimo, da je oblika spet kot pri neizboljšani trapezni metodi}
+\end{figure}
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{mat/35.pdf}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{mat/36.pdf}
+\end{subfigure}
+\caption*{Pri h=0.5 opazimo že močnejšo nestabilnost.}
+\end{figure}
+
+
+\section{Dodatna naloga}
+
+Tokrat imamo vzbujeno dušeno matematično nihalo:
+
+\begin{equation*}
+\frac{d^2x}{dt^2} + \beta \frac{dx}{dt} + sin(x) = v cos(\omega_0 t)
+\end{equation*}
+Oglejmo si primer za $\beta=0.5$ , $\omega_0 = \frac{2}{3}$ in $ 0.5 < v < 1.5$
+Za reševanje bom spet uporabil metodo Runge Kutta s prilagodljivim korakom.
+Diferencialno enačbo najprej pretvorimo v sistem diferencialnih enačb prvega reda:
+\begin{align*}
+\frac{dx}{dt} =& p \\
+\frac{dp}{dt} =& v cos(\omega_0 t) - sin(x) - \beta p
+\end{align*}
+
+Da vidimo nekaj slik za ta oscilator:
+
+\begin{figure}[H]
+\begin{subfigure}{.3\textwidth}
+\includegraphics[width=\linewidth]{dod/1.pdf}
+\end{subfigure}
+\begin{subfigure}{.3\textwidth}
+\includegraphics[width=\linewidth]{dod/2.pdf}
+\end{subfigure}
+\begin{subfigure}{.3\textwidth}
+\includegraphics[width=\linewidth]{dod/3.pdf}
+\end{subfigure}
+\end{figure}
+
+\begin{figure}[H]
+\begin{subfigure}{.3\textwidth}
+\includegraphics[width=\linewidth]{dod/4.pdf}
+\end{subfigure}
+\begin{subfigure}{.3\textwidth}
+\includegraphics[width=\linewidth]{dod/5.pdf}
+\end{subfigure}
+\begin{subfigure}{.3\textwidth}
+\includegraphics[width=\linewidth]{dod/6.pdf}
+\end{subfigure}
+\end{figure}
+
+\begin{figure}[H]
+\begin{subfigure}{.3\textwidth}
+\includegraphics[width=\linewidth]{dod/7.pdf}
+\end{subfigure}
+\begin{subfigure}{.3\textwidth}
+\includegraphics[width=\linewidth]{dod/8.pdf}
+\end{subfigure}
+\begin{subfigure}{.3\textwidth}
+\includegraphics[width=\linewidth]{dod/9.pdf}
+\end{subfigure}
+\end{figure}
+
+\begin{figure}[H]
+\begin{subfigure}{.3\textwidth}
+\includegraphics[width=\linewidth]{dod/10.pdf}
+\end{subfigure}
+\begin{subfigure}{.3\textwidth}
+\includegraphics[width=\linewidth]{dod/11.pdf}
+\end{subfigure}
+\begin{subfigure}{.3\textwidth}
+\includegraphics[width=\linewidth]{dod/12.pdf}
+\end{subfigure}
+\end{figure}
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{dod/13.pdf}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{dod/14.pdf}
+\end{subfigure}
+\end{figure}
+
+Opazimo, da najprej začne nihati na nek način, a prej ali slej to začetno nihanje zamre in ostane samo še vsiljeno nihanje. Fazni portret je zato tudi drugačen, ne več le ena zaključena krožnica/elipsa.
+
+Poglejmo si še resonančne krivulje za več amplitud:(V naslednjih grafih sem gledal največje amplitude, katere so se pojavile -v prvih primerih so to včasih amplitude, s kateremi je nihalo le za kak nihaj preden je dušenje znižalo amplitudo. Vseeno bomo videli, da se vidi resonance)
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{reso/1.pdf}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{reso/4.pdf}
+\end{subfigure}
+\caption*{Pri neki frekvenci je amplituda višja kot pri ostalih kot bi pričakovali}
+\end{figure}
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{reso/5.pdf}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{reso/2.pdf}
+\end{subfigure}
+\caption*{Resonančna krivulja začenja dobivati nenavadnejšo obliko}
+\end{figure}
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{reso/3.pdf}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{reso/6.pdf}
+\end{subfigure}
+\caption*{To izgleda malo čudno. Ne bi se zanašal, da je prav.}
+\end{figure}
+
+
+
+\section{Dodatna dodatna naloga}
+
+Poglejmo si še van der Polov oscilator
+
+\begin{equation*}
+\frac{d^2x}{dt^2} - \lambda \frac{dx}{dt}(1-x^2) + x = v cos(\omega_0 t)
+\end{equation*}
+Kjer so $\omega_0 = 1$, $v=10$ in $\lambda = 1$
+
+Spet to razdelimo na sistem enačb prvega reda:
+\begin{align*}
+\frac{dx}{dt} =& p \\
+\frac{dp}{dt} =& v cos(\omega_0 t) - x + \lambda p (1-x^2)
+\end{align*}
+\newpage
+To je rezultat:
+
+\begin{figure}[H]
+\begin{subfigure}{.3\textwidth}
+\includegraphics[width=\linewidth]{pol1.pdf}
+\end{subfigure}
+\begin{subfigure}{.3\textwidth}
+\includegraphics[width=\linewidth]{pol2.pdf}
+\end{subfigure}
+\begin{subfigure}{.3\textwidth}
+\includegraphics[width=\linewidth]{pol3.pdf}
+\end{subfigure}
+\end{figure}
+
+\begin{figure}[H]
+\begin{subfigure}{.3\textwidth}
+\includegraphics[width=\linewidth]{pol4.pdf}
+\end{subfigure}
+\begin{subfigure}{.3\textwidth}
+\includegraphics[width=\linewidth]{pol5.pdf}
+\end{subfigure}
+\begin{subfigure}{.3\textwidth}
+\includegraphics[width=\linewidth]{pol6.pdf}
+\end{subfigure}
+\end{figure}
+\end{document}

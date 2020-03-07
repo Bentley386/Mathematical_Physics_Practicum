@@ -1,0 +1,276 @@
+\documentclass{article}
+
+\title{Matemati{\v c}no-fizikalni praktikum: Robni problem lastnih vrednosti}
+\author{Andrej Kolar-Po{\v z}un}
+
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{subcaption}
+\usepackage{caption}
+\usepackage{float}
+\usepackage{physics}
+
+\errorcontextlines 10000
+\begin{document}
+\pagenumbering{gobble}
+\maketitle
+\newpage
+\pagenumbering{arabic}
+
+\section{Uvod}
+
+Reševal bom Gelfand-Bratujev robni problem:
+\begin{equation*}
+y'' = -\delta e^y
+\end{equation*}
+z robnima pogojema $y(0)=y(1)=0$
+za $0 < \delta < 3.51$ ima problem rešitvi. Ena izmed njiju je:
+\begin{equation*}
+y(x) = -2 ln\Big( \frac{cosh(\xi (1-2x))}{cosh(\xi)}\Big)
+\end{equation*}
+Kjer je $\xi$ rešitev $cosh(\xi) = \sqrt{8/\delta \xi}$
+
+Iz enačbe vidimo, da bo naša rešitev konkavna(Drugi odvod je vedno negativen). Za začetni pogoj bom torej tudi vzel neko konkavno funkcijo in sicer $u(x) =\mu x(1-x)$. Preikzusil bom 
+$\mu = 1$ in $\mu = 16$.
+
+\section{Reševanje}
+
+\subsection{Eksplicitna iterativna metoda}
+
+Najprej bom uporabil tole iteracijsko shemo:
+
+\begin{equation*}
+u_j^{(n+1)} = \frac{1}{1+\omega} \Big[ \frac{1}{2}(u_{j+1}^{(n)} + u_{j-1}^{(n)}) + \omega u_j^{(n)} + \frac{h^2}{2}\delta e^{u_j^{(n)}}\Big]
+\end{equation*}
+Začel bom z $\mu=1$ in $\omega=0.5$
+
+Prva stvar, katero sem opazil je, da je hitrost konvergence zelo odvisna od števila točk.
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{1.pdf}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{2.pdf}
+\end{subfigure}
+\caption*{Vidimo, da se za N=10 natančnost drastično izboljša napram N>100. Vseeno nočem imeti za risanje funkcije samo 10 točk, zato bom vajo ponovil z več iteracijami}
+\end{figure}
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{3.pdf}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{4.pdf}
+\end{subfigure}
+\caption*{Bolje, opazimo tudi da je zdaj 50 točk natančnejših kot le 10.}
+\end{figure}
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{5.pdf}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{6.pdf}
+\end{subfigure}
+\caption*{Tukaj sem preverjal še optimalno število iteracij. Odločil sem se za 50 ekvidistančnih točk, kar se mi zdi dovolj pa še natančno je bilo. Vidimo, da je izboljšava, ki jo dobimo z 20000 iteracijami namesto s 10000 zelo majhna(traja pa že vidno več časa)}
+\end{figure}
+\newpage
+Primerjal bom še različne omege. Zanima me pri kateri bo natančnost največja pri fiksnem številu iteracij(10000).
+
+\begin{figure}[H]
+\includegraphics[width=\linewidth]{7.pdf}
+\caption*{V tem primeru torej izgleda, da se najbolje obnese, če delamo kar brez omege(Metoda bolje deluje za nižje omege, najbolje če je enaka nič). Za negativne omege vrne "not a number"(Najbrž zdivergira)}
+\end{figure}
+
+Vseeno hočem videti, če je kaj prednosti pri večji omega. Zato bom sedaj preveril točno kako hitro konvergira pri različnih omega.
+In sicer tako, da bom gledal koliko iteracij je potrebnih, da je razlika med aproksimacijo in pravo vrednostjo recimo $10^{-3}$. Razliko bom gledal med vsotama vseh 50 vrednosti funkcije na intervalu.
+\newpage
+\begin{center}
+ \begin{tabular}{||c c||} 
+ \hline
+ $\omega$ & št. iteracijl \\ [0.5ex] 
+ \hline\hline
+ 0 & 3383 \\ 
+ \hline
+ 0.1 & 3721 \\ 
+ \hline
+ 0.2 & 4060 \\ 
+ \hline
+ 0.3 & 4398 \\ 
+ \hline
+ 0.4 & 4737 \\ 
+ \hline
+ 0.5 & 5076 \\ 
+ \hline
+ 0.6 & 5414 \\ 
+ \hline
+ 0.7 & 5753 \\ 
+ \hline
+ 0.8 & 6091 \\ 
+ \hline
+ 0.9 & 6430 \\ 
+ \hline
+ 1 & 6769 \\ 
+ \hline
+\end{tabular}
+\end{center}
+
+Še grafično:
+
+\begin{figure}[H]
+\includegraphics[width=\linewidth]{8.pdf}
+\caption*{Odvisnost je torej linearna}
+\end{figure}
+
+\newpage
+\subsection{Newtonova metoda}
+Zdaj bom preizkusil še Newtnovo metodo.
+Newtnova metoda se uporablja za iskanje ničel, zato morem moj sistme enačb prepisat v obliko $F(x) = 0$:
+\begin{equation*}
+-\frac{u_{j+1} - 2u_j + u_{j-1}}{h^2} + f(u_j) = 0
+\end{equation*}
+
+rešujem sistem enačb:
+$J(u^{(n)}) \Delta u^{(n)} = -F(u^{(n)})$
+Kjer je J jacobijeva matrika F-a.
+
+Dobim naslednji približek:
+$u^{(n+1)} = u^{(n)} + \Delta u^{(n)}$
+
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{9.pdf}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{10.pdf}
+\end{subfigure}
+\caption*{Vidimo, da je metoda primerljivo natančna prejšnji metodi, vendar zdaj ne prevlada več za N=50 ampak dalj časa raste z N-jem}
+\end{figure}
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{11.pdf}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{12.pdf}
+\end{subfigure}
+\caption*{Natančnost najprej raste z večanjem števila iteracij, a se hitro ustavi pri neki točki, po kateri dodatne iteracije ne izboljšajo natančnosti.}
+\end{figure}
+
+\newpage
+\subsection{$\mu=16$}
+
+Opremljen s temi dvemi metodamo bom zdaj poizkusil najti še drugo rešitev robnega problema. Vem, da ima ta višje funkcijske vrednosti in bom zato začel z višjim začetnim približkom 
+in sicer $u_0 = 16x(1-x)$
+
+Najprej poskusimo z našo prvo iterativno shemo:
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{13.pdf}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{14.pdf}
+\end{subfigure}
+\caption*{Napaka je vsekakor večja kot pri drugi rešitvi. Na sredini ima za N=1000 tudi neko čudno obliko. Na sliki je viden le N=1000 in N=500. Razlog za to je, ker je za manjše N pravzaprav metoda divergirala, in je seveda nisem mogel narisati}
+\end{figure}
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{15.pdf}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{16.pdf}
+\end{subfigure}
+\caption*{Vidimo, da neka razlika z napakami pri različnih številih iteracij je. Razlike so samo na manjšem območju nekje na sredini intervala} 
+\end{figure}
+
+\begin{figure}[H]
+\includegraphics[width=\linewidth]{17.pdf}
+\caption*{Tukaj pa vidimo, da je rešitev skorajda neodvisna od izbire omege. Pri omega = 0.8 imamo sicer nekoliko večjo natančnost vendar je ta "večja natančnost" na tako majhen območju, da v  bistvu ni razlike. To je še ena razlika od prve rešitve, kjer je izbira različne omege spremenila napako metode.}
+\end{figure}
+
+Sedaj bom drugo rešitev poizkusil poiskati še z Newtnovo metodo:
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{18.pdf}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{19.pdf}
+\end{subfigure}
+\caption*{Tudi tukaj je za veliko N-jev (in večje število iteracij) metoda divergirala. Napaka pa je tudi veliko večja kot pri prvi rešitvi.} 
+\end{figure}
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{20.pdf}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{21.pdf}
+\end{subfigure}
+\caption*{Na levi vidimo čudno obnašanje metode pri višjem številu iteracij(pri še višjem divergira). Na desni vidimo rešitve pri večjem številu iteracij} 
+\end{figure}
+
+\begin{figure}[H]
+\includegraphics[width=\linewidth]{22.pdf}
+\caption*{1 iteracija je že konkurentna po natančnosti večjem številu iteracij. Po 10 pa začne napaka samo rasti.} 
+\end{figure}
+\newpage
+\subsection{več $\delta$}
+
+Sedaj si bom pogledal še, kako rešitve izgledajo pri več različnih možnosti za parameter $\delta$. Uporabil bom prvo iterativno shemo z N=50, $\omega=0$ in številom iteracij 10000, kot se je najbolj
+obneslo do sedaj. Najprej bom poskusil najti prvo rešitev z začetnim približkom $u_0 = x(1-x)$:
+\begin{figure}[H]
+\includegraphics[width=\linewidth]{delte.pdf}
+\caption*{Z večanjem delte je funkcija bolj izbočena in seže višje.} 
+\end{figure}
+\newpage
+Sedaj pa še z začetnim približkom $u_0 = 16x(1-x)$. Tokrat bom za N vzel 1000:
+
+\begin{figure}[H]
+\includegraphics[width=\linewidth]{delte2.pdf}
+\caption*{Spet je z večanjem delte je funkcija malce bolj izbočena in seže malce višje.} 
+\end{figure}
+
+\newpage
+\section{Dodatna naloga}
+
+Sedaj bom problem poskusil rešiti še s strelsko metodo.
+Za reševanje z nekimi začetnimi pogoji bom uporabil metodo Runge Kutta s prilagodljivo velikostjo koraka.
+Naši robni pogoji so y(0) = y(1) = 0.
+Runge Kutta bom pognal s pogojem y(0) = 0 in y'(0) = a , kjer je a neka uganjena vrednost odvoda. 
+Runge Kutta bom potem pognal do y(1) in pogledal kakko blizu sem robnemu pogoju y(1)=0. a bom potem spreminjal toliko časa,
+dokler ne bo y(1) že blizu ničle. a bom poiskla s pomočjo scipy-jeve funkcije fsolve.
+
+Najprej moram mojo diferencialno enačbo 2. reda pretvoriti v sistem enačb prvega reda:
+\begin{align*}
+y' =& p \\
+p' =& -e^y 
+\end{align*}
+
+\begin{figure}[H]
+\includegraphics[width=\linewidth]{strelska.pdf}
+\caption*{Izgleda, da deluje v redu. Vrnilo je prvo rešitev. Prva uganitev za odvod je bila v tem primeru 1.} 
+\end{figure}
+
+\begin{figure}[H]
+\includegraphics[width=\linewidth]{strelska2.pdf}
+\caption*{Dobil sem tudi drugo rešitev s tem, da sem za prvi približek za odvod izbral 10, saj vem, da druga rešitev na začetku stremeje narašča} 
+\end{figure}
+
+Rad bi naredil samo še zadnjo primerjavo med tremi obdelanimi metodami:
+
+\begin{figure}[H]
+\includegraphics[width=\linewidth]{strelskaprimer.pdf}
+\caption*{Primerjava za prvo rešitev. Vidimo, da je strelska metoda najbolj natančna, iterativna shema pa najmanj. Kot parametre za iterativno shemo sem vzel N=50,I=10000,$\omega=0$ , za Newtnovo pa N=100,I=100} 
+\end{figure}
+
+\begin{figure}[H]
+\includegraphics[width=\linewidth]{strelskaprimer2.pdf}
+\caption*{Pri drugi rešitvi je strelska metoda zelo zelo dobra. Saj smo že prej videli, da sta se Newtnova in Iteracijska shema slabo obnesli. Parametre za iteracijsko sem tukaj vzel N=1000,I=10000,$\omega=0$, za Newtnovo pa N=100, I=5} 
+\end{figure}
+\end{document}

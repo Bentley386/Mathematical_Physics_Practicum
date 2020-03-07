@@ -1,0 +1,204 @@
+\documentclass{article}
+
+\title{Matemati{\v c}no-fizikalni praktikum: Diferencne metode za PDE}
+\author{Andrej Kolar-Po{\v z}un}
+
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{subcaption}
+\usepackage{caption}
+\usepackage{float}
+\usepackage{physics}
+
+\errorcontextlines 10000
+\begin{document}
+\pagenumbering{gobble}
+\maketitle
+\newpage
+\pagenumbering{arabic}
+
+\section{Uvod}
+
+V tej nalogi bomo reševali Schrödingerjevo enačbo:
+\begin{align*}
+&\Big(i\hbar \frac{\partial}{\partial t} - H \Big) \psi(x,t) = 0 \\
+&H = -\frac{\hbar ^2}{2m} \frac{\partial ^2}{\partial x^2} + V(x) 
+\end{align*}
+
+Oziroma z zamenjavo spremenljivk:
+\begin{equation*}
+H = -\frac{1}{2}\frac{\partial^2}{\partial x^2} + V(x)
+\end{equation*}
+
+S pomočjo operatorja časovnega razvoja lahko pridemo do tele aproksimacije:
+Časovni razvoj spremljamo ob časih $t_n = n \Delta t$
+\begin{equation*}
+\psi(x,t+\Delta t) \approx \frac{1-\frac{1}{2}i H \Delta t}{1+\frac{1}{2}i H \Delta t}\psi (x,t)
+\end{equation*}
+
+Po kraju pa lahko območje, ki nas zanima diskretiziramo kot $x_j = a+j \Delta x$ $\Delta x = (b-a)/(N-1)$ in krajevni odvod
+aproksimiramo kot diferenco:
+\begin{equation*}
+\psi ''(x) = \frac{\psi_{j+1}^n - 2\psi_j^n + \psi_{j-1} ^n}{\Delta x^2}
+\end{equation*}
+Kjer smo uvedli oznako $\psi(x_j,t_n) = \psi_j^n$
+
+Ko ti aproksimaciji vstavimo v enačbo dobimo sistem enačb katerega lahko zapišemo v matrični
+obliki kot $A\psi^{n+1} = A^* \psi^n$, kjer je $\psi ^n = (\psi_0^n,\psi_1^n,...,\psi_{N-1}^n)$ in kjer je
+A tridiagonalna matrika, z komponentami $A_{ii} = d_i$ in $A_{i, i+1} =A_{i+1,i} = a$,
+kjer je $a = -i\frac{\Delta t}{4 \Delta x^2}$ in $d_j = 1 -2a + i\frac{\Delta t}{2}V(x_j)$
+
+\section{Reševanje}
+Naše začetno stanje je $\psi(x,0) = \sqrt{\frac{\alpha}{\sqrt{\pi}}} e^{-\alpha^2(x-\lambda)^2/2}$
+Nihajni čas je $T=10\pi$, v nadaljevanju bom z $N_x$ označeval na koliko delov sem diskretiziral po iksu, z $N_t$ pa po času.
+Na vseh grafih je prikazana verjetnostna gostota torej $|\psi(x,t)|^2$
+
+Poglejmo si najprej napake.
+\newpage
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{Napake/1.pdf}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{Napake/2.pdf}
+\end{subfigure}
+\end{figure}
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{Napake/3.pdf}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{Napake/4.pdf}
+\end{subfigure}
+\end{figure}
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{Napake/5.pdf}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{Napake/6.pdf}
+\end{subfigure}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{Napake/7.pdf}
+\end{subfigure}
+\caption*{Vidimo torej, da (vsaj v območju do N je nekajkrat tisoč) večji N pomeni boljšo natančnost. Na začetku se razlika med recimo N=500 in N=1000 ne pozna, pri poznejših časih pa jo opazimo. Poleg tega pri poznejših časih(Po t=T) napaka tako naraste, da je metoda za te N-je čisto narobe.}
+\end{figure}
+
+Sedaj bom pogledal pri še večjih N-jih, da vidim kaj je z napako. Gledal bom pri času 5T, saj napaka očitno narašča s časom.
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{Napake/8.pdf}
+\end{subfigure}
+\caption*{Očitno lahko torej še vedno dobimo zadovoljiv rezultat, le N mora biti toliko večji. Žal program potem tudi teče občutno več časa.}
+\end{figure}
+\newpage
+Naredimo sedaj nekaj plottov:
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{nihaji.pdf}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{nihajia.pdf}
+\end{subfigure}
+\caption*{Vidimo, da v bistvu opazno metoda malo peša že tukaj}
+\end{figure}
+
+\begin{figure}[H]
+\begin{subfigure}{.3\textwidth}
+\includegraphics[width=\linewidth]{nihaji2.pdf}
+\end{subfigure}
+\begin{subfigure}{.3\textwidth}
+\includegraphics[width=\linewidth]{nihaji3.pdf}
+\end{subfigure}
+\begin{subfigure}{.3\textwidth}
+\includegraphics[width=\linewidth]{nihaji2a.pdf}
+\end{subfigure}
+\caption*{Veliki N-ji torej res pomagajo, a žal zelo upočasnijo izvedbo}
+\end{figure}
+
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{nihaji5.pdf}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{nihaji6.pdf}
+\end{subfigure}
+\caption*{Pri večjem času tudi N=2000 odpove in bi morali vzeti še večji N in čakati še dalj časa}
+\end{figure}
+
+
+Kaj pa če močno povečamo le diskretizacijo po iksu oziroma času?
+
+\begin{figure}[H]
+\begin{subfigure}{.3\textwidth}
+\includegraphics[width=\linewidth]{Napake/disk1.pdf}
+\end{subfigure}
+\begin{subfigure}{.3\textwidth}
+\includegraphics[width=\linewidth]{Napake/disk2.pdf}
+\end{subfigure}
+\begin{subfigure}{.3\textwidth}
+\includegraphics[width=\linewidth]{Napake/disk3.pdf}
+\end{subfigure}
+\caption*{Ne izgleda veliko bolje}
+\end{figure}
+
+\newpage
+Poglejmo si naslednjo nalogo in sicer časovni razvoj gaussovega paketa:
+\begin{equation*}
+\psi(x,0) = (2\pi \sigma_0^2)^{-0.25} e^{i k_0 (x-\lambda)} e^{-(x-\lambda)^2/(2 \sigma_0)^2}
+\end{equation*}
+Kjer so $\sigma_0 = 1/20$, $k_0 = 50\pi$, $\lambda = 0.25$. 
+Po navodilih bom pri reševanju vedno upošteval $\Delta t = 2 \Delta x^2$
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{Druga/potek.pdf}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{Druga/potek2.pdf}
+\end{subfigure}
+\caption*{Najprej na hitro pogledam kako sprememba diskretizacije v času(in s tem tudi v kraju) vpliva na rešitev. Vidim, da ne veliko.}
+\end{figure}
+
+\begin{figure}[H]
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{Druga/anal.pdf}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{Druga/potek3.pdf}
+\end{subfigure}
+\end{figure}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\end{document}
