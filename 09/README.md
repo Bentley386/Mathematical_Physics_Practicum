@@ -2,5 +2,5 @@ In this project I had to solve a partial differential equation (PDE) with spectr
 Fourier modes or the B-Splines.
 
 <div style="text-align: center;">
-    <img src="teaser.png" alt="Solution plot" width="400"/>
+    <img src="teeaser.png" alt="Solution plot" width="400"/>
 </div>
